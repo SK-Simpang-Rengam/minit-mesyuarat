@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Minit SK Simpang Rengam</title>
+    <!-- Bulma CSS & FontAwesome -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Pustaka Penghasil PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root { --primary-color: #1e3a8a; }
+        body { background-color: #f4f7fa; padding: 20px; font-family: 'Segoe UI', sans-serif; }
+        .form-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); max-width: 800px; margin: 0 auto; }
+        .form-header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #edf2f7; padding-bottom: 15px; }
+        #pdfTemplate { position: absolute; left: -9999px; width: 700px; padding: 40px; background: white; color: black; line-height: 1.6; }
+        .pdf-header { text-align: center; font-weight: bold; border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 20px; font-size: 14pt; }
+        .pdf-section { font-weight: bold; margin-top: 15px; margin-bottom: 5px; text-transform: uppercase; border-bottom: 1px solid #000; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="form-header">
+            <h1 class="title is-4" style="color: var(--primary-color);">SISTEM E-MINIT MESYUARAT</h1>
+            <p class="subtitle is-6 has-text-grey">SK Simpang Rengam</p>
+        </div>
+
+        <form id="minitForm">
+            <div class="columns">
+                <div class="column is-4">
+                    <div class="field">
+                        <label class="label">Kategori Unit</label>
+                        <div class="select is-fullwidth">
+                            <select id="kategoriUnit" onchange="kemaskiniUnit()" required>
+                                <option value="">-- Pilih --</option>
+                                <option value="KURIKULUM">Kurikulum</option>
+                                <option value="HEM">HEM</option>
+                                <option value="KOKURIKULUM">Kokurikulum</option>
+                                <option value="PENTADBIRAN">Pentadbiran</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-8">
+                    <div class="field">
+                        <label class="label">Nama Unit / Panitia / Kelab</label>
+                        <div class="select is-fullwidth">
+                            <select id="namaUnitDetail" required>
+                                <option value="">-- Sila Pilih Kategori Dahulu --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Tajuk Penuh Mesyuarat</label>
+                <input class="input" id="tajuk" placeholder="Contoh: Mesyuarat Panitia Sains Bil 1/2026" required>
+            </div>
+
+            <div class="columns">
+                <div class="column">
+                    <label class="label">Tarikh</label>
+                    <input class="input" type="date" id="tarikh" required>
+                </div>
+                <div class="column">
+                    <label class="label">Masa</label>
+                    <input class="input" id="masa" placeholder="Contoh: 1:30 PM" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Pengerusi Mesyuarat</label>
+                <input class="input" id="pengerusi" placeholder="Nama Guru Besar / GPK" required>
+            </div>
+
+            <div class="field">
+                <label class="label">Senarai Kehadiran</label>
+                <textarea class="textarea" id="kehadiran" rows="3" placeholder="1. Nama Guru..." required></textarea>
+            </div>
+
+            <div class="field">
+                <label class="label">Isi Perbincangan / Agenda</label>
+                <textarea class="textarea" id="perbincangan" rows="6" placeholder="Nyatakan perkara yang dibincangkan..." required></textarea>
+            </div>
+
+            <div class="field">
+                <label class="label">Tindakan / Hal-Hal Lain</label>
+                <textarea class="textarea" id="tindakan" rows="3" placeholder="Tindakan susulan jika ada..."></textarea>
+            </div>
+
+            <button type="submit" class="button is-link is-fullwidth is-large mt-4">
+                <i class="fas fa-file-pdf mr-2"></i> SIMPAN & JANA PDF
+            </button>
+        </form>
+    </div>
+
+    <!-- TEMPLAT PDF TERSEMBUNYI -->
+    <div id="pdfTemplate">
+        <div class="pdf-header">MINIT MESYUARAT SK SIMPANG RENGAM<br><span id="pTajuk"></span></div>
+        <p><strong>Tarikh:</strong> <span id="pTarikh"></span> | <strong>Masa:</strong> <span id="pMasa"></span></p>
+        <p><strong>Pengerusi:</strong> <span id="pPengerusi"></span></p>
+        
+        <div class="pdf-section">1. Perutusan Pengerusi / Kehadiran</div>
+        <p id="pKehadiran" style="white-space: pre-line; padding-left: 15px;"></p>
+
+        <div class="pdf-section">2. Perkara Baharu / Perbincangan Agenda</div>
+        <p id="pIsi" style="white-space: pre-line; padding-left: 15px;"></p>
+
+        <div class="pdf-section">3. Tindakan / Hal-Hal Lain</div>
+        <p id="pTindakan" style="white-space: pre-line; padding-left: 15px;"></p>
+        
+        <br><br>
+        <p>Disediakan oleh Setiausaha Mesyuarat.</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Konfigurasi Firebase Anda yang Sebenar
+        const firebaseConfig = {
+            apiKey: "AIzaSyCRJOiazrnB36Gfsr3chXsyuKN3W4Bw1EY",
+            authDomain: "minit-mesyuarat-sksr.firebaseapp.com",
+            projectId: "minit-mesyuarat-sksr",
+            storageBucket: "minit-mesyuarat-sksr.firebasestorage.app",
+            messagingSenderId: "89243689884",
+            appId: "1:89243689884:web:f3b1ab7d263f4841915e59",
+            measurementId: "G-01Q8992WC4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const dataUnit = {
+            KURIKULUM: ["Panitia Bahasa Melayu", "Panitia Bahasa Inggeris", "Panitia Sains", "Panitia Matematik", "Panitia Pendidikan Islam"],
+            HEM: ["Unit Disiplin & Pengawas", "Unit Kantin", "Unit SPBT", "Unit Kebajikan"],
+            KOKURIKULUM: ["Kelab Bola Sepak", "Kelab Bola Jaring", "Kelab Sains & Matematik", "Persatuan Pengakap", "BSMM"],
+            PENTADBIRAN: ["Mesyuarat Guru & Staf", "Mesyuarat Kewangan", "Mesyuarat JK Pengurusan"]
+        };
+
+        window.kemaskiniUnit = () => {
+            const kat = document.getElementById('kategoriUnit').value;
+            const det = document.getElementById('namaUnitDetail');
+            det.innerHTML = '<option value="">-- Pilih Unit --</option>';
+            if(dataUnit[kat]) dataUnit[kat].forEach(u => { det.innerHTML += `<option value="${u}">${u}</option>`; });
+        };
+
+        document.getElementById('namaUnitDetail').addEventListener('change', function() {
+            if(this.value) document.getElementById('tajuk').value = `Mesyuarat ${this.value} Bil 1/2026`;
+        });
+
+        document.getElementById('minitForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                kategori: document.getElementById('kategoriUnit').value,
+                unit: document.getElementById('namaUnitDetail').value,
+                tajuk: document.getElementById('tajuk').value,
+                tarikh: document.getElementById('tarikh').value,
+                masa: document.getElementById('masa').value,
+                pengerusi: document.getElementById('pengerusi').value,
+                kehadiran: document.getElementById('kehadiran').value,
+                isi: document.getElementById('perbincangan').value,
+                tindakan: document.getElementById('tindakan').value,
+                tarikh_diisi: new Date().toISOString()
+            };
+
+            try {
+                await addDoc(collection(db, "minit_mesyuarat"), payload);
+            } catch (err) { console.error("Ralat simpan Firebase:", err); }
+
+            // Mapping data ke templat PDF
+            document.getElementById('pTajuk').innerText = payload.tajuk;
+            document.getElementById('pTarikh').innerText = payload.tarikh.split('-').reverse().join('/');
+            document.getElementById('pMasa').innerText = payload.masa;
+            document.getElementById('pPengerusi').innerText = payload.pengerusi;
+            document.getElementById('pKehadiran').innerText = payload.kehadiran;
+            document.getElementById('pIsi').innerText = payload.isi;
+            document.getElementById('pTindakan').innerText = payload.tindakan || "Tiada tindakan susulan.";
+
+            const { jsPDF } = window.jspdf;
+            html2canvas(document.getElementById('pdfTemplate'), { scale: 2 }).then(canvas => {
+                const doc = new jsPDF('p', 'pt', 'a4');
+                doc.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 595, (canvas.height * 595) / canvas.width);
+                doc.save(`Minit_${payload.tajuk.replace(/\s+/g, '_')}.pdf`);
+                alert("Berjaya disimpan dan PDF dimuat turun!");
+                document.getElementById('minitForm').reset();
+            });
+        });
+    </script>
+</body>
+</html>
