@@ -34,6 +34,12 @@
         /* Semakan CSS */
         .hidden-section { display: none !important; }
         .hidden-logo { display: none; }
+
+        /* Gaya Khusus Rangka Pratinjau PDF Cross-Device */
+        .pdf-container-box { width: 100%; height: 65vh; border: 1px solid #ccc; background: #e4e4e7; border-radius: 6px; overflow: hidden; }
+        @media screen and (max-width: 768px) {
+            .pdf-container-box { height: 50vh; }
+        }
     </style>
 </head>
 <body>
@@ -206,7 +212,7 @@
                 </div>
 
                 <button type="submit" class="button is-link is-fullwidth mt-5">
-                    <i class="fas fa-file-pdf mr-2"></i> SIMPAN & PRATINJAU MINIT MESYUARAT
+                    <i class="fas fa-eye mr-2"></i> SEMAK DAN PRATINJAU MINIT MESYUARAT
                 </button>
             </form>
         </div>
@@ -252,6 +258,28 @@
         </div>
     </div>
 
+    <div class="modal" id="pdfPreviewModal">
+        <div class="modal-background" onclick="tutupModalPreview()"></div>
+        <div class="modal-card" style="width: 90%; max-width: 850px;">
+            <header class="modal-card-head" style="background-color: #f8fafc;">
+                <p class="modal-card-title" style="font-size: 1.1rem; font-weight: 700; color: var(--primary-color);">
+                    <i class="fas fa-file-invoice mr-2"></i>Pratinjau Dokumen PDF SKSR
+                </p>
+                <button class="delete" aria-label="close" onclick="tutupModalPreview()"></button>
+            </header>
+            <section class="modal-card-body p-3">
+                <div id="pdfViewLoader" class="pdf-container-box">
+                    </div>
+            </section>
+            <footer class="modal-card-foot is-justify-content-flex-end" style="background-color: #f8fafc; gap: 10px;">
+                <button class="button is-light" onclick="tutupModalPreview()">Tutup</button>
+                <button class="button is-link" id="btnSahkanMuatTurun">
+                    <i class="fas fa-download mr-2"></i> Muat Turun Fail PDF
+                </button>
+            </footer>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -269,7 +297,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // DATA SISTEM UTAMA
         const dataUnit = {
             KURIKULUM: ["Pengurusan Kurikulum", "Panitia Bahasa Melayu", "Panitia Bahasa Inggeris", "Panitia Matematik", "Panitia Sains", "Panitia Pendidikan Islam/Moral", "Panitia Bahasa Arab", "Panitia Pendidikan Jasmani dan Kesihatan", "Panitia Pendidikan Seni Visual", "Panitia Pendidikan Muzik"],
             HEM: ["Pengurusan HEM", "Unit Disiplin & Pengawas", "Unit Bimbingan & Kaunseling", "Unit Skim Pinjaman Buku Teks", "Unit Kantin", "Unit RMT", "Unit Kesihatan dan Keselamatan", "Unit Kebajikan dan Bantuan", "Unit APDM/IDME/Kehadiran Murid", "Unit Pendaftaran dan Penempatan", "Unit Lawatan"],
@@ -279,8 +306,9 @@
 
         let semuaDataMinit = [];
         let kategoriSemasa = "SEMUA";
+        let penampungFailPdfSemasa = null; 
+        let penampungNamaFailSemasa = "Minit_Mesyuarat.pdf";
 
-        // FUNGSI NAVIGASI DASHBOARD (TUKAR TAB)
         window.tukarHalamanUtama = (menu) => {
             document.getElementById('tabMenu-tulis').classList.remove('is-active');
             document.getElementById('tabMenu-semak').classList.remove('is-active');
@@ -293,11 +321,10 @@
             } else if(menu === 'semak') {
                 document.getElementById('tabMenu-semak').classList.add('is-active');
                 document.getElementById('seksyen-semak').classList.remove('hidden-section');
-                muatDataMinit();
+                muatDataMinit(); 
             }
         };
 
-        // KEMASKINI DROPDOWN UNIT
         window.kemaskiniUnit = () => {
             const kat = document.getElementById('kategoriUnit').value;
             const det = document.getElementById('namaUnitDetail');
@@ -309,7 +336,6 @@
             if(this.value) document.getElementById('tajuk').value = `Mesyuarat ${this.value} Bil 1/2026`;
         });
 
-        // PENGURUSAN TAG GURU
         let senaraiGuruDipilih = [];
         window.tambahGuru = () => {
             const selectEl = document.getElementById('teacherSelect');
@@ -332,7 +358,6 @@
             });
         }
 
-        // AGENDA DINAMIK
         let counterAgenda = 1;
         window.tambahKotakAgenda = () => {
             const container = document.getElementById('agendaContainer');
@@ -365,7 +390,7 @@
             if(item) item.remove();
         };
 
-        // SUBMIT & SIMPAN FORM MINIT
+        // SUBMIT FORM MINIT & TERUS BUKA PREVIEW MODAL
         document.getElementById('minitForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if(senaraiGuruDipilih.length === 0) { alert("Sila tentukan maklumat kehadiran terlebih dahulu."); return; }
@@ -399,9 +424,8 @@
 
             try { await addDoc(collection(db, "minit_mesyuarat"), payload); } catch (err) { console.error("Ralat Firebase:", err); }
 
-            // Menjalankan pratinjau tab baharu sebaik sahaja borang dihantar
-            janaPdfMinit(payload);
-            alert("Berjaya disimpan! Menghantar fail ke tab pratinjau baharu.");
+            // Beri respon pratinjau setempat tanpa kacau borang asal lagi
+            paparModalPratinjauPDF(payload);
 
             // Reset Borang Kosong Semula
             document.getElementById('minitForm').reset();
@@ -409,9 +433,6 @@
             senaraiGuruDipilih = []; counterAgenda = 1; renderTags();
         });
 
-        // =================================================================
-        // LOGIK DASHBOARD: LOGIK MEMUAT DATA & PENGURUSAN HUB SEMAKAN
-        // =================================================================
         async function muatDataMinit() {
             try {
                 const q = query(collection(db, "minit_mesyuarat"), orderBy("tarikh", "desc"));
@@ -425,162 +446,132 @@
             }
         }
 
-// KEMASKINI: Menggunakan semula butang interaktif yang serasi dengan Safari Mac
-function binaJadualPaparan(data) {
-    const tbody = document.getElementById('senaraiMinitTbody');
-    if (data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="has-text-centered has-text-grey py-4">Tiada rekod minit mesyuarat ditemui.</td></tr>`;
-        return;
-    }
-    tbody.innerHTML = "";
-    data.forEach((minit, index) => {
-        const tarikhDiformat = minit.tarikh.split('-').reverse().join('/');
-        
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><strong>${tarikhDiformat}</strong></td>
-            <td><span class="tag is-light is-info">${minit.kategori}</span></td>
-            <td><span class="is-block" style="color:#1e3a8a; font-weight:600;">${minit.unit}</span><small class="has-text-grey">${minit.tajuk}</small></td>
-            <td>${minit.pengerusi}</td>
-            <td class="has-text-centered">
-                <button class="button is-small is-link is-outlined btn-download-preview" data-id="${index}">
-                    <i class="fas fa-file-pdf mr-1"></i> Buka PDF
-                </button>
-            </td>
-        `;
-        tbody.appendChild(row);
-    });
+        // KEMASKINI: Butang buka PDF kini melancarkan fungsi paparan modal yang selamat
+        function binaJadualPaparan(data) {
+            const tbody = document.getElementById('senaraiMinitTbody');
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="has-text-centered has-text-grey py-4">Tiada rekod minit mesyuarat ditemui.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = "";
+            data.forEach((minit, index) => {
+                const tarikhDiformat = minit.tarikh.split('-').reverse().join('/');
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${tarikhDiformat}</strong></td>
+                    <td><span class="tag is-light is-info">${minit.kategori}</span></td>
+                    <td><span class="is-block" style="color:#1e3a8a; font-weight:600;">${minit.unit}</span><small class="has-text-grey">${minit.tajuk}</small></td>
+                    <td>${minit.pengerusi}</td>
+                    <td class="has-text-centered">
+                        <button class="button is-small is-link is-outlined btn-download" data-id="${index}">
+                            <i class="fas fa-eye mr-1"></i> Pratinjau PDF
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            document.querySelectorAll('.btn-download').forEach(btn => {
+                btn.addEventListener('click', function() { 
+                    paparModalPratinjauPDF(data[this.getAttribute('data-id')]); 
+                });
+            });
+        }
 
-    // Menambah event listener 'click' secara dinamik untuk mengelakkan sekatan pop-up Safari
-    document.querySelectorAll('.btn-download-preview').forEach(btn => {
-        btn.addEventListener('click', function() { 
-            const indeksData = this.getAttribute('data-id');
-            bukaPratinjauSafariFriendly(data[indeksData]); 
+        window.tapisKategori = (kat) => {
+            kategoriSemasa = kat;
+            document.querySelectorAll('#seksyen-semak .tabs li').forEach(li => li.classList.remove('is-active'));
+            document.getElementById(`tab-${kat}`).classList.add('is-active');
+            laksanaPenapisanPenuh();
+        };
+
+        window.tapisTeks = () => { laksanaPenapisanPenuh(); };
+
+        function laksanaPenapisanPenuh() {
+            const kataKunci = document.getElementById('kataKunciCarian').value.toLowerCase();
+            let hasilTapis = semuaDataMinit;
+            if (kategoriSemasa !== "SEMUA") hasilTapis = hasilTapis.filter(m => m.kategori === kategoriSemasa);
+            if (kataKunci.trim() !== "") {
+                hasilTapis = hasilTapis.filter(m => m.unit.toLowerCase().includes(kataKunci) || m.tajuk.toLowerCase().includes(kataKunci) || m.pengerusi.toLowerCase().includes(kataKunci));
+            }
+            binaJadualPaparan(hasilTapis);
+        }
+
+        // =================================================================
+        // SISTEM JANA, MODAL PRATINJAU & MUAT TURUN ANTI-SEKATAN GAJET
+        // =================================================================
+        function paparModalPratinjauPDF(payload) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'pt', 'a4');
+            let startTableY = 165;
+            const logoImg = document.getElementById('logoSekolah');
+            if (logoImg) { try { doc.addImage(logoImg, 'PNG', 262.5, 20, 70, 70); } catch (err) { console.error(err); } }
+            
+            doc.setFont("Helvetica", "bold"); doc.setFontSize(13);
+            doc.text("MINIT MESYUARAT SESI PERSEKOLAHAN 2026", 297, startTableY - 50, { align: "center" });
+            doc.text("SK SIMPANG RENGAM", 297, startTableY - 32, { align: "center" });
+
+            let teksKehadiranDiformat = "";
+            payload.kehadiran.forEach((g, idx) => { teksKehadiranDiformat += `${idx + 1}. ${g}\n`; });
+            const tarikhDiformat = payload.tarikh.split('-').reverse().join('/');
+
+            doc.autoTable({
+                startY: startTableY, theme: 'plain',
+                styles: { borderHexColor: '#000000', borderWidth: 1.5, lineColor: 0, cellPadding: 6, fontSize: 10, textColor: 0 },
+                columnStyles: { 0: { fontStyle: 'bold', halign: 'center', width: 90 }, 1: { width: 230 }, 2: { fontStyle: 'bold', halign: 'center', width: 70 }, 3: { width: 130 } },
+                body: [[{ content: 'PERKARA' }, payload.tajuk.toUpperCase(), { content: 'TARIKH' }, tarikhDiformat], [{ content: 'RUJ FAIL' }, payload.rujukan, { content: 'MASA' }, payload.masa.toUpperCase()], [{ content: 'TEMPAT' }, payload.tempat.toUpperCase(), { content: 'ANJURAN' }, `UNIT ${payload.kategori} SKSR`], [{ content: 'KEHADIRAN' }, { content: teksKehadiranDiformat.trim(), colSpan: 3, styles: { cellPadding: 6 } }], [{ content: 'TIDAK HADIR' }, { content: payload.tidak_hadir, colSpan: 3, styles: { cellPadding: 6 } }]]
+            });
+
+            let susunanBarisIsi = [[{ content: '1', styles: { halign: 'center' } }, { content: 'UCAPAN ALU-ALUAN PENGERUSI\n\n' + payload.perutusan_pengerusi }, { content: 'Pengerusi /\nMakluman', styles: { halign: 'center', valign: 'middle' } }]];
+            payload.senarai_agenda.forEach((agenda, index) => {
+                susunanBarisIsi.push([{ content: (index + 2).toString(), styles: { halign: 'center' } }, { content: agenda.sub_tajuk.toUpperCase() + '\n\n' + agenda.sub_isi }, { content: agenda.sub_tindakan, styles: { halign: 'center', valign: 'middle' } }]);
+            });
+
+            doc.autoTable({ startY: doc.lastAutoTable.finalY + 15, theme: 'plain', head: [['BIL.', 'PERKARA / ISU', 'TINDAKAN / MAKLUMAN']], headStyles: { fillColor: '#f2f2f2', fontStyle: 'bold', halign: 'center', textColor: 0, borderHexColor: '#000000', borderWidth: 1.5 }, styles: { borderHexColor: '#000000', borderWidth: 1.5, lineColor: 0, cellPadding: 8, fontSize: 10, textColor: 0, valign: 'top' }, columnStyles: { 0: { width: 40 }, 1: { width: 330 }, 2: { width: 150 } }, body: susunanBarisIsi });
+            let finalY = doc.lastAutoTable.finalY + 30; if (finalY > 730) { doc.addPage(); finalY = 50; }
+            doc.setFont("Helvetica", "normal"); doc.setFontSize(10); doc.text("Disediakan oleh:", 50, finalY);
+            doc.setLineDashPattern([3, 3], 0); doc.line(50, finalY + 45, 250, finalY + 45);
+            doc.setFont("Helvetica", "bold"); doc.text(payload.setiausaha.toUpperCase(), 50, finalY + 60);
+            doc.setFont("Helvetica", "normal"); doc.text("Setiausaha Mesyuarat", 50, finalY + 72); doc.text("SK Simpang Rengam", 50, finalY + 84);
+
+            // Simpan rujukan doc jsPDF dan nama fail secara global untuk butang muat turun modal
+            penampungFailPdfSemasa = doc;
+            penampungNamaFailSemasa = `Minit_${payload.unit.replace(/\s+/g, '_')}_${tarikhDiformat.replace(/\//g, '-')}.pdf`;
+
+            // Bina Blob URL khas untuk pemuat data pratinjau iframe/object
+            const pdfBlob = doc.output('blob');
+            const blobUrl = URL.createObjectURL(pdfBlob);
+
+            // Suntik elemen <object> ke dalam modal untuk paparan pratinjau yang sangat mesra Android/iOS/Safari
+            const kontainerPratinjau = document.getElementById('pdfViewLoader');
+            kontainerPratinjau.innerHTML = `
+                <object data="${blobUrl}" type="application/pdf" width="100%" height="100%">
+                    <div class="p-5 has-text-centered">
+                        <p class="mb-3">Gajet anda tidak menyokong pratinjau fail PDF secara langsung.</p>
+                        <a href="${blobUrl}" download="${penampungNamaFailSemasa}" class="button is-link is-small">
+                            <i class="fas fa-download mr-1"></i> Klik Sini Untuk Buka Fail
+                        </a>
+                    </div>
+                </object>
+            `;
+
+            // Paparkan modal
+            document.getElementById('pdfPreviewModal').classList.add('is-active');
+        }
+
+        window.tutupModalPreview = () => {
+            document.getElementById('pdfPreviewModal').classList.remove('is-active');
+            document.getElementById('pdfViewLoader').innerHTML = "";
+            penampungFailPdfSemasa = null;
+        };
+
+        // Tindakan mematikan isu muat turun Safari/Mobile dengan memanggil muat turun terus fizikal dari memori modal
+        document.getElementById('btnSahkanMuatTurun').addEventListener('click', () => {
+            if (penampungFailPdfSemasa) {
+                penampungFailPdfSemasa.save(penampungNamaFailSemasa);
+            } else {
+                alert("Ralat: Tiada fail PDF aktif ditemui untuk dimuat turun.");
+            }
         });
-    });
-}
-
-// FUNGSI BAHARU: Khas untuk menjana dan membuka tab pratinjau yang disokong penuh oleh Safari & Chrome
-function bukaPratinjauSafariFriendly(payload) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'pt', 'a4');
-    let startTableY = 165;
-    const logoImg = document.getElementById('logoSekolah');
-    if (logoImg) { try { doc.addImage(logoImg, 'PNG', 262.5, 20, 70, 70); } catch (err) { console.error(err); } }
-    
-    doc.setFont("Helvetica", "bold"); doc.setFontSize(13);
-    doc.text("MINIT MESYUARAT SESI PERSEKOLAHAN 2026", 297, startTableY - 50, { align: "center" });
-    doc.text("SK SIMPANG RENGAM", 297, startTableY - 32, { align: "center" });
-
-    let teksKehadiranDiformat = "";
-    payload.kehadiran.forEach((g, idx) => { teksKehadiranDiformat += `${idx + 1}. ${g}\n`; });
-    const tarikhDiformat = payload.tarikh.split('-').reverse().join('/');
-
-    doc.autoTable({
-        startY: startTableY, theme: 'plain',
-        styles: { borderHexColor: '#000000', borderWidth: 1.5, lineColor: 0, cellPadding: 6, fontSize: 10, textColor: 0 },
-        columnStyles: { 0: { fontStyle: 'bold', halign: 'center', width: 90 }, 1: { width: 230 }, 2: { fontStyle: 'bold', halign: 'center', width: 70 }, 3: { width: 130 } },
-        body: [[{ content: 'PERKARA' }, payload.tajuk.toUpperCase(), { content: 'TARIKH' }, tarikhDiformat], [{ content: 'RUJ FAIL' }, payload.rujukan, { content: 'MASA' }, payload.masa.toUpperCase()], [{ content: 'TEMPAT' }, payload.tempat.toUpperCase(), { content: 'ANJURAN' }, `UNIT ${payload.kategori} SKSR`], [{ content: 'KEHADIRAN' }, { content: teksKehadiranDiformat.trim(), colSpan: 3, styles: { cellPadding: 6 } }], [{ content: 'TIDAK HADIR' }, { content: payload.tidak_hadir, colSpan: 3, styles: { cellPadding: 6 } }]]
-    });
-
-    let susunanBarisIsi = [[{ content: '1', styles: { halign: 'center' } }, { content: 'UCAPAN ALU-ALUAN PENGERUSI\n\n' + payload.perutusan_pengerusi }, { content: 'Pengerusi /\nMakluman', styles: { halign: 'center', valign: 'middle' } }]];
-    payload.senarai_agenda.forEach((agenda, index) => {
-        susunanBarisIsi.push([{ content: (index + 2).toString(), styles: { halign: 'center' } }, { content: agenda.sub_tajuk.toUpperCase() + '\n\n' + agenda.sub_isi }, { content: agenda.sub_tindakan, styles: { halign: 'center', valign: 'middle' } }]);
-    });
-
-    doc.autoTable({ startY: doc.lastAutoTable.finalY + 15, theme: 'plain', head: [['BIL.', 'PERKARA / ISU', 'TINDAKAN / MAKLUMAN']], headStyles: { fillColor: '#f2f2f2', fontStyle: 'bold', halign: 'center', textColor: 0, borderHexColor: '#000000', borderWidth: 1.5 }, styles: { borderHexColor: '#000000', borderWidth: 1.5, lineColor: 0, cellPadding: 8, fontSize: 10, textColor: 0, valign: 'top' }, columnStyles: { 0: { width: 40 }, 1: { width: 330 }, 2: { width: 150 } }, body: susunanBarisIsi });
-    let finalY = doc.lastAutoTable.finalY + 30; if (finalY > 730) { doc.addPage(); finalY = 50; }
-    doc.setFont("Helvetica", "normal"); doc.setFontSize(10); doc.text("Disediakan oleh:", 50, finalY);
-    doc.setLineDashPattern([3, 3], 0); doc.line(50, finalY + 45, 250, finalY + 45);
-    doc.setFont("Helvetica", "bold"); doc.text(payload.setiausaha.toUpperCase(), 50, finalY + 60);
-    doc.setFont("Helvetica", "normal"); doc.text("Setiausaha Mesyuarat", 50, finalY + 72); doc.text("SK Simpang Rengam", 50, finalY + 84);
-
-    // Trik Utama Safari: Tukar hasil output kepada Blob tulen, bina URL objek, dan lancarkan window.open()
-    const pdfBlob = doc.output('blob');
-    const blobUrl = URL.createObjectURL(pdfBlob);
-    
-    // Membuka tab baharu secara langsung hasil respons klik pengguna
-    window.open(blobUrl, '_blank');
-}
-
-        // FUNGSI PEMBANTU UTAMA: MEMBINA BLOB DATA PDF DI BELAKANG TAB SECARA SENYAP
-        function janaBlobUrlUntukBaris(payload) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('p', 'pt', 'a4');
-            let startTableY = 165;
-            const logoImg = document.getElementById('logoSekolah');
-            if (logoImg) { try { doc.addImage(logoImg, 'PNG', 262.5, 20, 70, 70); } catch (err) { console.error(err); } }
-            
-            doc.setFont("Helvetica", "bold"); doc.setFontSize(13);
-            doc.text("MINIT MESYUARAT SESI PERSEKOLAHAN 2026", 297, startTableY - 50, { align: "center" });
-            doc.text("SK SIMPANG RENGAM", 297, startTableY - 32, { align: "center" });
-
-            let teksKehadiranDiformat = "";
-            payload.kehadiran.forEach((g, idx) => { teksKehadiranDiformat += `${idx + 1}. ${g}\n`; });
-            const tarikhDiformat = payload.tarikh.split('-').reverse().join('/');
-
-            doc.autoTable({
-                startY: startTableY, theme: 'plain',
-                styles: { borderHexColor: '#000000', borderWidth: 1.5, lineColor: 0, cellPadding: 6, fontSize: 10, textColor: 0 },
-                columnStyles: { 0: { fontStyle: 'bold', halign: 'center', width: 90 }, 1: { width: 230 }, 2: { fontStyle: 'bold', halign: 'center', width: 70 }, 3: { width: 130 } },
-                body: [[{ content: 'PERKARA' }, payload.tajuk.toUpperCase(), { content: 'TARIKH' }, tarikhDiformat], [{ content: 'RUJ FAIL' }, payload.rujukan, { content: 'MASA' }, payload.masa.toUpperCase()], [{ content: 'TEMPAT' }, payload.tempat.toUpperCase(), { content: 'ANJURAN' }, `UNIT ${payload.kategori} SKSR`], [{ content: 'KEHADIRAN' }, { content: teksKehadiranDiformat.trim(), colSpan: 3, styles: { cellPadding: 6 } }], [{ content: 'TIDAK HADIR' }, { content: payload.tidak_hadir, colSpan: 3, styles: { cellPadding: 6 } }]]
-            });
-
-            let susunanBarisIsi = [[{ content: '1', styles: { halign: 'center' } }, { content: 'UCAPAN ALU-ALUAN PENGERUSI\n\n' + payload.perutusan_pengerusi }, { content: 'Pengerusi /\nMakluman', styles: { halign: 'center', valign: 'middle' } }]];
-            payload.senarai_agenda.forEach((agenda, index) => {
-                susunanBarisIsi.push([{ content: (index + 2).toString(), styles: { halign: 'center' } }, { content: agenda.sub_tajuk.toUpperCase() + '\n\n' + agenda.sub_isi }, { content: agenda.sub_tindakan, styles: { halign: 'center', valign: 'middle' } }]);
-            });
-
-            doc.autoTable({ startY: doc.lastAutoTable.finalY + 15, theme: 'plain', head: [['BIL.', 'PERKARA / ISU', 'TINDAKAN / MAKLUMAN']], headStyles: { fillColor: '#f2f2f2', fontStyle: 'bold', halign: 'center', textColor: 0, borderHexColor: '#000000', borderWidth: 1.5 }, styles: { borderHexColor: '#000000', borderWidth: 1.5, lineColor: 0, cellPadding: 8, fontSize: 10, textColor: 0, valign: 'top' }, columnStyles: { 0: { width: 40 }, 1: { width: 330 }, 2: { width: 150 } }, body: susunanBarisIsi });
-            let finalY = doc.lastAutoTable.finalY + 30; if (finalY > 730) { doc.addPage(); finalY = 50; }
-            doc.setFont("Helvetica", "normal"); doc.setFontSize(10); doc.text("Disediakan oleh:", 50, finalY);
-            doc.setLineDashPattern([3, 3], 0); doc.line(50, finalY + 45, 250, finalY + 45);
-            doc.setFont("Helvetica", "bold"); doc.text(payload.setiausaha.toUpperCase(), 50, finalY + 60);
-            doc.setFont("Helvetica", "normal"); doc.text("Setiausaha Mesyuarat", 50, finalY + 72); doc.text("SK Simpang Rengam", 50, finalY + 84);
-
-            // Memulangkan rentetan data bloburl asli
-            return doc.output('bloburl');
-        }
-
-        // FUNGSI UNTUK TINDAKAN SELEPAS SUBMIT FORM (MEMBUKA TAB BARU SECARA SEGERA)
-        function janaPdfMinit(payload) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('p', 'pt', 'a4');
-            let startTableY = 165;
-            const logoImg = document.getElementById('logoSekolah');
-            if (logoImg) { try { doc.addImage(logoImg, 'PNG', 262.5, 20, 70, 70); } catch (err) { console.error(err); } }
-            
-            doc.setFont("Helvetica", "bold"); doc.setFontSize(13);
-            doc.text("MINIT MESYUARAT SESI PERSEKOLAHAN 2026", 297, startTableY - 50, { align: "center" });
-            doc.text("SK SIMPANG RENGAM", 297, startTableY - 32, { align: "center" });
-
-            let teksKehadiranDiformat = "";
-            payload.kehadiran.forEach((g, idx) => { teksKehadiranDiformat += `${idx + 1}. ${g}\n`; });
-            const tarikhDiformat = payload.tarikh.split('-').reverse().join('/');
-
-            doc.autoTable({
-                startY: startTableY, theme: 'plain',
-                styles: { borderHexColor: '#000000', borderWidth: 1.5, lineColor: 0, cellPadding: 6, fontSize: 10, textColor: 0 },
-                columnStyles: { 0: { fontStyle: 'bold', halign: 'center', width: 90 }, 1: { width: 230 }, 2: { fontStyle: 'bold', halign: 'center', width: 70 }, 3: { width: 130 } },
-                body: [[{ content: 'PERKARA' }, payload.tajuk.toUpperCase(), { content: 'TARIKH' }, tarikhDiformat], [{ content: 'RUJ FAIL' }, payload.rujukan, { content: 'MASA' }, payload.masa.toUpperCase()], [{ content: 'TEMPAT' }, payload.tempat.toUpperCase(), { content: 'ANJURAN' }, `UNIT ${payload.kategori} SKSR`], [{ content: 'KEHADIRAN' }, { content: teksKehadiranDiformat.trim(), colSpan: 3, styles: { cellPadding: 6 } }], [{ content: 'TIDAK HADIR' }, { content: payload.tidak_hadir, colSpan: 3, styles: { cellPadding: 6 } }]]
-            });
-
-            let susunanBarisIsi = [[{ content: '1', styles: { halign: 'center' } }, { content: 'UCAPAN ALU-ALUAN PENGERUSI\n\n' + payload.perutusan_pengerusi }, { content: 'Pengerusi /\nMakluman', styles: { halign: 'center', valign: 'middle' } }]];
-            payload.senarai_agenda.forEach((agenda, index) => {
-                susunanBarisIsi.push([{ content: (index + 2).toString(), styles: { halign: 'center' } }, { content: agenda.sub_tajuk.toUpperCase() + '\n\n' + agenda.sub_isi }, { content: agenda.sub_tindakan, styles: { halign: 'center', valign: 'middle' } }]);
-            });
-
-            doc.autoTable({ startY: doc.lastAutoTable.finalY + 15, theme: 'plain', head: [['BIL.', 'PERKARA / ISU', 'TINDAKAN / MAKLUMAN']], headStyles: { fillColor: '#f2f2f2', fontStyle: 'bold', halign: 'center', textColor: 0, borderHexColor: '#000000', borderWidth: 1.5 }, styles: { borderHexColor: '#000000', borderWidth: 1.5, lineColor: 0, cellPadding: 8, fontSize: 10, textColor: 0, valign: 'top' }, columnStyles: { 0: { width: 40 }, 1: { width: 330 }, 2: { width: 150 } }, body: susunanBarisIsi });
-            let finalY = doc.lastAutoTable.finalY + 30; if (finalY > 730) { doc.addPage(); finalY = 50; }
-            doc.setFont("Helvetica", "normal"); doc.setFontSize(10); doc.text("Disediakan oleh:", 50, finalY);
-            doc.setLineDashPattern([3, 3], 0); doc.line(50, finalY + 45, 250, finalY + 45);
-            doc.setFont("Helvetica", "bold"); doc.text(payload.setiausaha.toUpperCase(), 50, finalY + 60);
-            doc.setFont("Helvetica", "normal"); doc.text("Setiausaha Mesyuarat", 50, finalY + 72); doc.text("SK Simpang Rengam", 50, finalY + 84);
-
-            // Membuka data blob URL di tab baharu secara langsung
-            const blobString = doc.output('bloburl');
-            window.open(blobString, '_blank');
-        }
     </script>
 </body>
 </html>
