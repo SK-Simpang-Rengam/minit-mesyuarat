@@ -501,7 +501,11 @@
             doc.setLineDashPattern([3, 3], 0); doc.line(50, finalY + 45, 250, finalY + 45);
             doc.setFont("Helvetica", "bold"); doc.text(payload.setiausaha.toUpperCase(), 50, finalY + 60);
             doc.setFont("Helvetica", "normal"); doc.text("Setiausaha Mesyuarat", 50, finalY + 72); doc.text("SK Simpang Rengam", 50, finalY + 84);
-            doc.save(`Minit_${payload.tajuk.replace(/\s+/g, '_')}.pdf`);
+            // Menghasilkan URL Blob daripada fail PDF yang dijana
+            const blobUrl = doc.output('bloburl');
+            
+            // Membuka tab baharu untuk paparan pratinjau (Preview) sebelum cetak/muat turun
+            window.open(blobUrl, '_blank');
         }
     </script>
 </body>
