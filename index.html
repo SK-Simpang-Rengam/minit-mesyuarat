@@ -467,11 +467,21 @@
             binaJadualPaparan(hasilTapis);
         }
 
-        // FUNGSI GLOBAL UTAMA JANA PDF (KONGSI GUNA)
+        // FUNGSI GLOBAL UTAMA JANA PDF (VERSI MESRA SAFARI & POP-UP BLOCKER)
         function janaPdfMinit(payload) {
+            // 1. TERUS BUKA TAB BAHARU KOSONG DAHULU (Sangat penting untuk lepas sekatan Safari)
+            const tabBaru = window.open('about:blank', '_blank');
+            if (!tabBaru) {
+                alert("Sila benarkan 'Pop-up' pada tetapan pelayar web Safari anda untuk melihat PDF.");
+                return;
+            }
+            // Letakkan teks loading sementara fail diproses
+            tabBaru.document.write('<p style="font-family:sans-serif; text-align:center; margin-top:50px; color:#4a4a4a;"><i class="fas fa-spinner fa-spin"></i> Membina paparan fail PDF minit... Sila tunggu sekejap.</p>');
+
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'pt', 'a4');
             let startTableY = 165;
+            
             const logoImg = document.getElementById('logoSekolah');
             if (logoImg) { try { doc.addImage(logoImg, 'PNG', 262.5, 20, 70, 70); } catch (err) { console.error(err); } }
             
@@ -501,11 +511,10 @@
             doc.setLineDashPattern([3, 3], 0); doc.line(50, finalY + 45, 250, finalY + 45);
             doc.setFont("Helvetica", "bold"); doc.text(payload.setiausaha.toUpperCase(), 50, finalY + 60);
             doc.setFont("Helvetica", "normal"); doc.text("Setiausaha Mesyuarat", 50, finalY + 72); doc.text("SK Simpang Rengam", 50, finalY + 84);
-            // Menghasilkan URL Blob daripada fail PDF yang dijana
+
+            // 2. TUKAR URL TAB KOSONG TADI KEPADA URL BLOB PDF YANG SIAP
             const blobUrl = doc.output('bloburl');
-            
-            // Membuka tab baharu untuk paparan pratinjau (Preview) sebelum cetak/muat turun
-            window.open(blobUrl, '_blank');
+            tabBaru.location.href = blobUrl;
         }
     </script>
 </body>
