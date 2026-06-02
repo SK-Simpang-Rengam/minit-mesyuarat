@@ -4,44 +4,93 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Minit SK Simpang Rengam</title>
+    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-    <style>
-        :root { --primary-color: #1e3a8a; }
-        body { background-color: #f4f7fa; padding: 20px; font-family: 'Segoe UI', sans-serif; }
-        .form-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); max-width: 850px; margin: 0 auto; }
-        
-        /* Gaya Pengepala Borang */
-        .form-header { display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 20px; /* Ini akan memberi jarak 20px automatik antara logo dan teks */
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 3px double #1e3a8a;
-}
 
-.form-header img {
-    width: 80px; /* Menetapkan saiz logo yang ideal */
-    height: auto;
-    flex-shrink: 0; /* Mengelakkan logo daripada terpenyet jika skrin telefon kecil */
-}
+    <style>
+        :root { 
+            --primary-color: #1e3a8a; 
+        }
         
-        /* Pengurusan Kehadiran */
-        .kehadiran-box { border: 1px solid #dbdbdb; border-radius: 4px; padding: 10px; min-height: 60px; background: #fff; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 5px; }
-        .teacher-tag { margin: 2px; }
+        body { 
+            background-color: #f4f7fa; 
+            padding: 20px; 
+            font-family: 'Segoe UI', sans-serif; 
+        }
+        
+        .form-container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 15px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+            max-width: 850px; 
+            margin: 0 auto; 
+        }
+        
+        /* Gaya Pengepala Borang - Diperbaiki menggunakan Flexbox */
+        .form-header { 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px; /* Jarak selamat antara logo dan teks tajuk */
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px double var(--primary-color);
+        }
+
+        .form-header img {
+            width: 80px; /* Saiz ideal logo sekolah */
+            height: auto;
+            flex-shrink: 0; /* Mengelakkan imej terpenyet pada skrin telefon */
+        }
+
+        .form-title-area {
+            text-align: left;
+        }
+        
+        /* Pengurusan Kehadiran Guru */
+        .kehadiran-box { 
+            border: 1px solid #dbdbdb; 
+            border-radius: 4px; 
+            padding: 10px; 
+            min-height: 60px; 
+            background: #fff; 
+            margin-bottom: 10px; 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 5px; 
+        }
+        
+        .teacher-tag { 
+            margin: 2px; 
+        }
 
         /* Kotak Agenda Dinamik */
-        .agenda-item { background: #f9fafb; border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px; margin-bottom: 15px; position: relative; }
-        .btn-buang-agenda { position: absolute; top: 10px; right: 10px; }
+        .agenda-item { 
+            background: #f9fafb; 
+            border: 1px solid #e5e7eb; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 15px; 
+            position: relative; 
+        }
+        
+        .btn-buang-agenda { 
+            position: absolute; 
+            top: 10px; 
+            right: 10px; 
+        }
     </style>
 </head>
 <body>
+
     <div class="form-container">
         <div class="form-header">
-            <img src="logo_sksr.png" alt="Logo SK Simpang Rengam">
+            <img src="logo_sksr.png" id="logoSekolah" alt="Logo SK Simpang Rengam">
             <div class="form-title-area">
                 <h1 class="title is-4 mb-1" style="color: var(--primary-color);">SISTEM E-MINIT MESYUARAT</h1>
                 <p class="subtitle is-6 has-text-grey mb-0">SK Simpang Rengam</p>
@@ -50,116 +99,141 @@
 
         <form id="minitForm">
             <div class="columns">
-                <div class="column is-4">
+                <div class="column is-8">
                     <div class="field">
-                        <label class="label">Kategori Unit</label>
-                        <div class="select is-fullwidth">
-                            <select id="kategoriUnit" onchange="kemaskiniUnit()" required>
-                                <option value="">-- Pilih Kategori --</option>
-                                <option value="KURIKULUM">Kurikulum</option>
-                                <option value="HEM">Hal Ehwal Murid</option>
-                                <option value="KOKURIKULUM">Kokurikulum</option>
-                                <option value="PENTADBIRAN">Pentadbiran</option>
-                            </select>
+                        <label class="label is-small">Tajuk / Nama Mesyuarat</label>
+                        <div class="control">
+                            <input class="input is-small" id="tajukMesyuarat" placeholder="Contoh: Mesyuarat Jawatankuasa Kurikulum Bil 1/2026" required>
                         </div>
                     </div>
                 </div>
-                <div class="column is-8">
+                <div class="column is-4">
                     <div class="field">
-                        <label class="label">Nama Unit / Panitia / Kelab</label>
-                        <div class="select is-fullwidth">
-                            <select id="namaUnitDetail" required>
-                                <option value="">-- Sila Pilih Kategori Dahulu --</option>
-                            </select>
+                        <label class="label is-small">Rujukan Fail</label>
+                        <div class="control">
+                            <input class="input is-small" id="rujukanFail" placeholder="Contoh: SKSR.600-3/2/1(1)" required>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="columns">
-                <div class="column is-8">
+                <div class="column is-3">
                     <div class="field">
-                        <label class="label">Tajuk Penuh Mesyuarat</label>
-                        <input class="input" id="tajuk" placeholder="Contoh: Mesyuarat Panitia Bahasa Melayu Bil 1/2026" required>
+                        <label class="label is-small">Tarikh</label>
+                        <div class="control">
+                            <input class="input is-small" type="date" id="tarikhMesyuarat" required>
+                        </div>
                     </div>
                 </div>
-                <div class="column is-4">
+                <div class="column is-3">
                     <div class="field">
-                        <label class="label">Rujukan Fail</label>
-                        <input class="input" id="rujukanFail" placeholder="Contoh: SKSR.600-2/1/1" required>
+                        <label class="label is-small">Masa</label>
+                        <div class="control">
+                            <input class="input is-small" type="text" id="masaMesyuarat" placeholder="Contoh: 2:00 Petang" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-3">
+                    <div class="field">
+                        <label class="label is-small">Tempat</label>
+                        <div class="control">
+                            <input class="input is-small" type="text" id="tempatMesyuarat" placeholder="Contoh: Bilik Mesyuarat Al-Farabi" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-3">
+                    <div class="field">
+                        <label class="label is-small">Kategori / Unit Anjuran</label>
+                        <div class="control">
+                            <div class="select is-small is-fullwidth">
+                                <select id="kategoriUnit">
+                                    <option value="KURIKULUM">KURIKULUM</option>
+                                    <option value="HAL EHWAL MURID">HAL EHWAL MURID (HEM)</option>
+                                    <option value="KOKURIKULUM">KOKURIKULUM</option>
+                                    <option value="PENTADBIRAN">PENTADBIRAN</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="columns">
-                <div class="column">
-                    <label class="label">Tarikh</label>
-                    <input class="input" type="date" id="tarikh" required>
-                </div>
-                <div class="column">
-                    <label class="label">Masa</label>
-                    <input class="input" id="masa" placeholder="Contoh: 1:30 PM" required>
-                </div>
-                <div class="column">
-                    <label class="label">Tempat / Platform</label>
-                    <input class="input" id="tempat" placeholder="Contoh: Bilik Mesyuarat Aula Perdana" required>
-                </div>
-            </div>
-
-            <div class="columns">
-                <div class="column">
-                    <div class="field">
-                        <label class="label">Pengerusi Mesyuarat</label>
-                        <input class="input" id="pengerusi" placeholder="Nama Pengerusi" required>
-                    </div>
-                </div>
-                <div class="column">
-                    <div class="field">
-                        <label class="label">Disediakan Oleh (Setiausaha)</label>
-                        <input class="input" id="setiausaha" placeholder="Nama Setiausaha" required>
-                    </div>
-                </div>
-            </div>
+            <hr style="margin: 15px 0; background-color: #eee;">
 
             <div class="columns">
                 <div class="column is-6">
                     <div class="field">
-                        <label class="label">Kehadiran (Boleh Pilih Banyak)</label>
-                        <div class="select is-fullwidth mb-2">
-                            <select id="teacherSelect" onchange="tambahGuru()">
-                                <option value="">-- Klik Untuk Pilih Kehadiran --</option>
-                                <option value="GURU BESAR">Guru Besar</option>
-                                <option value="GPK KURIKULUM">GPK Kurikulum</option>
-                                <option value="GPK HEM">GPK HEM</option>
-                                <option value="GPK KOKURIKULUM">GPK Kokurikulum</option>
-                                <option value="GPK PETANG">GPK Petang</option>
-                                <option value="SEMUA GURU">Semua Guru</option>
-                                <option value="SILA RUJUK LAMPIRAN">Sila Rujuk Lampiran</option>
-                            </select>
-                        </div>
-                        <div class="kehadiran-box" id="selectedTeachersBox">
-                            <span class="has-text-grey-light subtitle is-7">Belum ada pilihan dibuat. Sila klik dropdown di atas.</span>
+                        <label class="label is-small">Nama Pengerusi Mesyuarat</label>
+                        <div class="control">
+                            <input class="input is-small" id="pengerusiMesyuarat" placeholder="Masukkan nama pengerusi..." required>
                         </div>
                     </div>
                 </div>
                 <div class="column is-6">
                     <div class="field">
-                        <label class="label">Guru Tidak Hadir</label>
-                        <textarea class="textarea" id="tidakHadir" rows="3" placeholder="Masukkan nama guru tidak hadir & alasan jika ada..."></textarea>
+                        <label class="label is-small">Nama Setiausaha / Pencatat Minit</label>
+                        <div class="control">
+                            <input class="input is-small" id="setiausahaMesyuarat" placeholder="Masukkan nama pencatat..." required>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="field">
-                <label class="label">1. Ucapan Alu-aluan Pengerusi</label>
-                <textarea class="textarea" id="perutusan" rows="3" placeholder="Isi perutusan atau alu-aluan pengerusi..." required></textarea>
+                <label class="label is-small">Kehadiran Guru / Ahli Mesyuarat (<span id="jumlahHadir">0</span> Orang Terpilih)</label>
+                <div class="columns mb-1">
+                    <div class="column is-10">
+                        <div class="control">
+                            <div class="select is-small is-fullwidth">
+                                <select id="pilihGuru">
+                                    <option value="">-- Sila Pilih Nama Guru Untuk Ditambah --</option>
+                                    <option value="MOHD RAFWAN BIN MILATUS SAMSUL">MOHD RAFWAN BIN MILATUS SAMSUL</option>
+                                    <option value="JEHAN ADIBA BINTI AHMAD TAHA">JEHAN ADIBA BINTI AHMAD TAHA</option>
+                                    <option value="AZIZAH BINTI SHARIFF">AZIZAH BINTI SHARIFF</option>
+                                    <option value="AHMAD SYAHMI BIN NURDIN">AHMAD SYAHMI BIN NURDIN</option>
+                                    <option value="FAIZAH BINTI ABDUL RAHMAN">FAIZAH BINTI ABDUL RAHMAN</option>
+                                    <option value="KHAIRUL ANUAR BIN ZAINAL">KHAIRUL ANUAR BIN ZAINAL</option>
+                                    <option value="NORMAH BINTI SULAIMAN">NORMAH BINTI SULAIMAN</option>
+                                    <option value="SITI AMINAH BINTI BAKAR">SITI AMINAH BINTI BAKAR</option>
+                                    <option value="ZULKIFLI BIN MAHMUD">ZULKIFLI BIN MAHMUD</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column is-2">
+                        <button type="button" class="button is-small is-info is-fullwidth" onclick="tambahGuruTerpilih()">
+                            <span class="icon"><i class="fas fa-plus"></i></span>
+                            <span>Tambah</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="kehadiran-box" id="kotakSenaraiHadir">
+                    </div>
             </div>
 
-            <div class="field mt-5">
-                <div class="is-flex is-justify-content-space-between is-align-items-center mb-3">
-                    <label class="label mb-0" style="color: var(--primary-color);">Perkara Baharu / Perbincangan Agenda & Tindakan</label>
-                    <button type="button" class="button is-small is-success is-light" onclick="tambahKotakAgenda()">
-                        <i class="fas fa-plus mr-1"></i> Tambah Agenda Baru
+            <div class="field">
+                <label class="label is-small">Ahli Tidak Hadir (Sebab)</label>
+                <div class="control">
+                    <textarea class="textarea is-small" id="tidakHadirMesyuarat" rows="2" placeholder="Contoh: 1. Guru A (Sakit), 2. Guru B (Kursus) - Jika tiada, tulis: Tiada"></textarea>
+                </div>
+            </div>
+
+            <hr style="margin: 15px 0; background-color: #eee;">
+
+            <div class="field">
+                <label class="label is-small">1. Perutusan / Ucapan Alu-Aluan Pengerusi</label>
+                <div class="control">
+                    <textarea class="textarea is-small" id="perutusanPengerusi" rows="4" placeholder="Masukkan intipati ucapan pembukaan oleh pengerusi mesyuarat..." required></textarea>
+                </div>
+            </div>
+
+            <div class="field">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <label class="label is-small mb-0">Agenda / Isu / Perkara Seterusnya (Format KPM)</label>
+                    <button type="button" class="button is-small is-success" onclick="tambahKotakAgendaBaharu()">
+                        <span class="icon"><i class="fas fa-plus-circle"></i></span>
+                        <span>Tambah Agenda Baharu</span>
                     </button>
                 </div>
                 
@@ -167,207 +241,180 @@
                     <div class="agenda-item" data-index="0">
                         <div class="field">
                             <label class="label is-small">Tajuk Isu / Perkara / Agenda</label>
-                            <input class="input is-small agenda-tajuk" placeholder="Contoh: Analisis Pencapaian Akademik 2025" required>
+                            <input class="input is-small agenda-tajuk" placeholder="Contoh: Analisis Pencapaian Akademik Konten PIT1 2026" required>
                         </div>
                         <div class="columns">
                             <div class="column is-8">
                                 <label class="label is-small">Perincian Isu / Kandungan Agenda</label>
-                                <textarea class="textarea is-small agenda-isi" rows="3" placeholder="Nyatakan intipati perbincangan..." required></textarea>
+                                <textarea class="textarea is-small agenda-isi" rows="3" placeholder="Nyatakan perkara yang dibincangkan serta keputusan mesyuarat..." required></textarea>
                             </div>
                             <div class="column is-4">
                                 <label class="label is-small">Tindakan / Makluman Kepada</label>
-                                <textarea class="textarea is-small agenda-tindakan" rows="3" placeholder="Contoh: Semua guru / Panitia berkaitan" required></textarea>
+                                <textarea class="textarea is-small agenda-tindakan" rows="3" placeholder="Contoh: Semua Guru / KP Mata Pelajaran" required></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <button type="submit" class="button is-link is-fullwidth is-large mt-5">
-                <i class="fas fa-file-pdf mr-2"></i> SIMPAN & JANA PDF JADUAL
-            </button>
+            <div class="field is-grouped is-grouped-right" style="margin-top: 30px;">
+                <div class="control">
+                    <button type="submit" class="button is-link" style="background-color: var(--primary-color);">
+                        <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                        <span>Simpan & Jana Dokumen PDF KPM</span>
+                    </button>
+                </div>
+            </div>
         </form>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <script>
+        let senaraiGuruDipilih = [];
+        let counterAgenda = 1;
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCRJOiazrnB36Gfsr3chXsyuKN3W4Bw1EY",
-            authDomain: "minit-mesyuarat-sksr.firebaseapp.com",
-            projectId: "minit-mesyuarat-sksr",
-            storageBucket: "minit-mesyuarat-sksr.firebasestorage.app",
-            messagingSenderId: "89243689884",
-            appId: "1:89243689884:web:f3b1ab7d263f4841915e59",
-            measurementId: "G-01Q8992WC4"
-        };
+        // Fungsi Tambah Guru Terpilih Ke Dalam Senarai Kehadiran
+        function tambahGuruTerpilih() {
+            const selectElement = document.getElementById('pilihGuru');
+            const namaGuru = selectElement.value;
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+            if (!namaGuru) return;
 
-        // =========================================================================
-        // STRING KOD BASE64 BAGI LOGO SK SIMPANG RENGAM
-        // =========================================================================
-        const stringLogoBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAfQAAAH0CAYAAADL1t+KAABCGmNhQlgAAEIaanVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAQfRqdW1iAAAAR2p1bWRjMm1hABEAEIAAAKoAOJtxA3VybjpjMnBhOmJkMjdlZGNjLWM4MTEtNDIxNS05OWU5LWM1NjhiZmU2MDk0OAAAAAHianVtYgAAAClqdW1kYzJhcwARABCAAACqADibcQNjMnBhLmFzc2VydGlvbnMAAAAA7mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNoOGpDgC64ugreOK2VKg8ZKwAAAKVjYm9yoWdhY3Rpb25zgaNmYWN0aW9ubGMycGEuY3JlYXRlZG1zb2Z0d2FyZUFnZW50aENhbnZhIEFJcWRpZ2l0YWxTb3VyY2VUeXBleFNodHRwOi8vY3YuaXB0Yy5vcmcvbmV3c2NvZGVzL2RpZ2l0YWxzb3VyY2V0eXBlL2NvbXBvc2l0ZVdpdGhUcmFpbmVkQWxnb3JpdGhtaWNNZWRpYQAAAMNqdW1iAAAAQGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaGFzaC5kYXRhAAAAABhjMnNoYfRRLx6rV7ILSrZeqUK8agAAAHtjYm9ypWpleGNsdXNpb25zgaJlc3RhcnQYIWZsZW5ndGgZQiZkbmFtZW5qdW1iZiBtYW5pZmVzdGNhbGdmc2hhMjU2ZGhhc2hYIPBFglwYTEWZIaispnBwp5Ln+mpc+11IB64mrPN9COtcY3BhZEgAAAAAAAAAAAAAAgtqdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAAB3GNib3Knamluc3RhbmNlSUR4LHhtcDppaWQ6NDk5M2MyOTMtYmUxYS00YzFlLWJhZWEtNjMzNDVhY2MyZDc0dGNsYWltX2dlbmVyYXRvcl9pbmZvo2RuYW1lZ2MycGEtcnNndmVyc2lvbmUwLjAuMHdvcmcuY29udGVudGF1dGguYzJwYV9yc2UwLjAuMGlzaWduYXR1cmV4TXNlbGYjanVtYmY9L2MycGEvdXJuOmMycGE6YmQyN2VkY2MtYzgxMS00MjE1LTk5ZTktYzU2OGJm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_tx68cMk_HJEcxNERlTjiy5hEgkY3rP1kPX8V_pnO_0s67Jos83KBlxa5Kp+cP3pgPHmrd1E7K0dbGx7QWPFlGSjCCBEYwggQuoAMCAQICEQDwUHcpJysnvjxnHTJW0yMdMA0GCSqGSIb3DQEBDQUAMIGBMQswCQYDVQQGEwJBVTEMMAoGA1UECBMDTlNXMQ8wDQYDVQQHEwZTeWRuZXkxEzARBgNVBAoTCkNhbnZhIFByb2QxFzAVBgNVBAsTDkNsb3VkIFBsYXRmb3JtMSUwIwYDVQQDDBxDYW52YSBQcm9kIFJvb3QgQ0EgR2xvYmFsIEcyMB4XDTI2MDIxNDAzMjIwN1ofDTI2MDgxMzAzMjIwN1owbTELMAkGA1UEBhMCQVUxDDAKBgNVBAgTA05TVzEPMA0GA1UEBxwZU3lkbmV5MRMwEQYDVQQKEwpDYW52YSBQcm9kMRAwDgYDVQQLEwdTaWduaW5nMRgwFgYDVQQDEw9TaWduaW5nIENBIFByb2QwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQCpg8y2jTW1J0IAv89OpFDo6iAg0BQ3C+tmmWEfRZyviSSxXRkbz+jTy2Z5qx1ZpKcOywXY795hD8kI6t1HHLso挑戰M1nnyM+OoiE2GRPTW8uN8ND3YMucgQAH1pzcIGMWO6barSQrAOIyVbAd18AdQg4YdLujcQmO4yBfqw52ZttlyTMkPcVYzEFEIShX8hzhH_J5KSDPos3hhv8pLk3KaybNyNwc7dtwXp9X+d9xrHt7w+ghfUnARXxQux9iQqjAe1hwbWy4jfMfYCj87EMhh4sUvKQHmlUD3MpaXbbeiKi8TKBtEnpqMz7UAyUb4LLEUid5CDzKMTu52BQs1tzxuqKUXybYY8IEizk6QD_3HOQ6lbYtQw3v1rygk33BZk8NlVkU24fsYr2mMkRuTuyr4oBb++kjCCwD5Sm9zHYdZ7TUfsN4UnQsQEv7Z06xv4Er0yYyodzlr7JZphUktNUWM+0W_VAMrOSbgjOIGbQgh4hFVvCA+HlVVdznP_e2Pslz8WNj5eourtmKWp6XrD12E6HzpqvaG+osF9gw5+gmuPDHQp8H4QUdusSgOfsqqirAVOqbxjezEb6M2pu6fCdAbfSYW20uHDyWWua4Ieo5yrf2sED+dAis6MWZI1A6WJ_Sjjbfh0TCz5pdiQdHDP4u4zPlSatoeVm5fH2gCJ2bAgMBAAGjgcswgcgwEgYDVR0TAQH_BAgwBgEB_wIBATAfBgNVHSMEGDAWgBTpSeqY3ZxpVH2Nf4+hbMjHKeStczAdBgNVHQ4EFgQUEVVux6d1aMuNR_onO3uuB9JaAUIwDgYDVR0PAQH_BAQDAgGGMGIGA1UdHwRbMFkwV6BVoFOGUWh0dHA6Ly9kMXVhZG4wcGpzaWg4bS5jbG91ZGZyb250Lm5ldC9jcmwvMGEwYWE0NTItOWYyNy00ODYzLWFlZGEtZWQ5NzZmMjBkOGJiLmNybDANBgkqhkiG9w0BAQ0FAAOCAgEAF2b9DkdGuy4Qv4H6_A1z4ZpxAdyTwOZuZUUgbzrTZN7t96PNWJPey02cC6s2hNo_YeFyKB7a2udXUTgUEbcIdwFCaZdTbQAA0zecZ6rEsNdefQXlpcmjoEqw2c3q7KsUp1Yz1ux4rT21lEz3EggICInJ9eju6giB_GGpXgEObIsQ_R2rFjP6v3sVyTQW0FnFiKM4Qcd2iXpJdFPDTSwmSKfWIFEHgdpDBM9czdm+bID3sMft++lHnUue4F49rL928NbUUJtX7TaxYVQ7JsfPfRphugKjDSlEZG53AlJ6PTM8+ZLwfYO4i_ZtCpmz5gVVC1iHgnIGj3cvqPAuIklW6Yt4waMxcT9a7hWYVdZmTUfl4sOZjAihbu_ykHMnIPzpn3ErYDDiAg7Vxff_+FiDkOA0gfDOfcOdUXWaVgzM3p2C_kutkEI0CsvyWSOVsk+DR9BCKbTHG8xzBBVRtGRq7s6D6KmZVq2a5r69w8bR_yLUQ+z+vwfIvGw3n0oAjZ+mpznWy1ZlzHQZonlDZhTdoRvcjd1l7sWss9hwmol9s0xDgKggoMpt4IFX1HVAZdd3gjiX93WVziUEa+u2Djan7IKV3pOVf6C6xRhQWoqqskxF8N1f_YqiZbjsQzaEE2tco11PQvt98FDWJPQNlgRDaMd6v8bPL9pIZWkMm7pBHjuhY3BhZFko7wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZZAgAGVauVz2aenrYY+m1uqTzHwOPeXc7V+kUDJ0QqmCKK6mqsVTaT/gNrEV5pbO24Lg5q+GF19cTRWZDiIwcz/w+hNGbT/CZMtkqBpDDTHBlerleOWbC+z5Dv3uqQ604cHx0h49elIF13ped7E6o+MAjRySmjx3BlLNNXMIGQ/1iIJkhBkyXms9SAtsGfl2R5J92TScr+DPI+jXlAtHn+qHE/5VtFjEJSgAGdmQoZXDPWkHd/EjDpF7V62o57iLFJhrdMF9rajpNHZJlIo72NWxkwyq9cEL9QeB5nPt1gb3GZGpc4wiYPSHaNr3pcEdGwUm+X8vNMhPneRHCvqWuHXbkfdSiXhKzp6seMi7TU1U2kkjWzjyMO/mGYv2rlC33Rgv7zUedfY+x/Q4PhTfIfmQbhROp5edJ5+YCtJlpRWBnWMveZ1JyCQBKySynG2tf05Q6FcBCYQJCAgkWrxeg1rP4U74gOSqyc8XsfyU5VgPsvtLHT+7htdgppp+4RDXqMEr1Y5z87P3eUIXpsir1VwSx2qY0ZgEcKId2CRWImwkc9zKHBXp3+eiHXgCm2J685vqnNfBvhNRnYasZ28JRq2n8SL/ESL+tfgpjMpj/pj0RInwRo5dgTHRQv8VWun/RmXh23pu8CU7YnW8fTizHzYFpYdl7xODnfoaX58zoheTnM+i/eWysAAAC0ZVhJZklJKgAIAAAABgASAQMAAQAAAAEAAAAaAQUAAQAAAFYAAAAbAQUAAQAAAF4AAAAoAQMAAQAAAAIAAAATAgMAAQAAAAEAAABphwQAAQAAAGYAAAAAAAAAYAAAAAEAAABgAAAAAQAAAAYAAJAHAAQAAAAwMjEwAZEHAAQAAAABAgMAAKAHAAQAAAAwMTAwAaADAAEAAAD//AAAqAEAAEAAAD0AQAAA6AEAAEAAAD0AQAAAAAAAADhw0QAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAZRaVRYdFhNTDpjb20uYWRvYmUueG1wAAAAAAA8P3hwYWNrZXQgYmVnaW49J++7vycgaWQ9J1c1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCc/Pgo8eDp4bXBtZXRhIHhtbG5zOng9J2Fkb2JlOm5zOm1ldGEvJz4KPHJkZjpSREYgeG1sbnM6cmRmPSdodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjJz4KCiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0nJwogIHhtbG5zOkF0dHJpYj0naHR0cDovL25zLmF0dHJpYnV0aW9uLmNvbS9hZHMvMS4wLyc+CiAgPEF0dHJpYjpBZHM+CiAgIGxyZGY6U2VxPgogICAgPHJkZjpsaSByZGY6cGFyc2VUeXBlPSdSZXNvdXJjZSc+CiAgICAgPEF0dHJpYjpDcmVhdGVkPjIwMjYtMDUtMDU8L0F0dHJpYjpDcmVhdGVkPgogICAgIDxBdHRyaWI6RGF0YT57JnF1b3Q7ZG9jJnF1b3Q7OiZxdW90O0RBRzhVRnpyUk84JnF1b3Q7LCZxdW90O3VzZXImcXVvdDs6JnF1b3Q7VUFFYzZCMzl2OVEmcXVvdDssJnF1b3Q7YnJhbmQmcXVvdDs6JnF1b3Q7U0sgU0lNUEFORyBSRU5HQU0mcXVvdDt9PC9BdHRyaWI6RGF0YT4KICAgICA8QXR0cmliOkV4dExtPjUzZjhkNzg2LTQ4ZjEtNGY5Yy1hOWE4LTNhZDIzYmE5ZTU2NTwvQXR0cmliOkV4dExtPgogICAgIDxBdHRyaWI6RmJJZD41MjUyNjU5MTQxNzk1ODA8L0F0dHJpYjpGYklkPgogICAgIDxBdHRyaWI6VG91Y2hUeXBlPjI8L0F0dHJpYjpUb3VjaFR5cGU+CiAgICA8L3JkZjpsaT4KICAgPC9yZGY6U2VxPgogIDwvQXR0cmliOkFkcz4KIDwvcmRmOkRlc2NyaXB0aW9uPgoKIDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PScnCiAgeG1sbnM6Q29udGFpbnNBaUdlbmVyYXRlZENvbnRlbnQ9J2h0dHBzOi8vY2FudmEuY29tL2V4cG9ydCc+CiAgPENvbnRhaW5zQWlHZW5lcmF0ZWRDb250ZW50OkNvbnRhaW5zQWlHZW5lcmF0ZWRDb250ZW50PlllczwvQ29udGFpbnNBaUdlbmVyYXRlZENvbnRlbnQ6Q29udGFpbnNBaUdlbmVyYXRlZENvbnRlbnQ+CiA8L3JkZjpEZXNjcmlwdGlvbj4KCiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0nJwogIHhtbG5zOmRjPSdodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyc+CiAgPGRjOnRpdGxlPgogICA8cmRmOkFsdD4KICAgIDxyZGY6bGkgeG1sOmxhbmc9J3gtZGVmYXVsdCc+U0VLLiBLRUIuIFNJTVBBTkcgUkVOR0FNIC0gMTwvcmRmOmxpPgogICA8L3JkZjpBbHQ+CiAgPC9kYzp0aXRsZT4KIDwvcmRmOkRlc2NyaXB0aW9uPgoKIDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PScnCiAgeG1sbnM6cGRmPSdodHRwOi8vbnMuYWRvYmUuY29tL3BkZi8xLjMvJz4KICA8cGRmOkF1dGhvcj5BWklaQUggQklOVEkgU0hBUklGRiBLUE0tR3VydTwvcGRmOkF1dGhvcj4KIDwvcmRmOkRlc2NyaXB0aW9uPgoKIDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PScnCiAgeG1sbnM6eG1wPSdodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvJz4KICA8eG1wOkNyZWF0b3JUb29sPkNhbnZhIGRvYz1EQUc4VUZ6clJPOCB1c2VyPVVBRWM2QjM5djlRIGJyYW5kPVNLIFNJTVBBTkcgUkVOR0FNPC94bXA6Q3JlYXRvclRvb2w+CiA8L3JkZjpEZXNjcmlwdGlvbj4KPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KPD94cGFja2V0IGVuZD0ncic/PrK8n4gAAnN0";
+            if (senaraiGuruDipilih.includes(namaGuru)) {
+                alert("Nama guru ini sudah tersenarai dalam daftar kehadiran.");
+                return;
+            }
 
-        // Paparkan logo pada interface aplikasi jika kod string wujud
-        if(stringLogoBase64) {
-            const imgEl = document.getElementById('appLogoView');
-            imgEl.src = stringLogoBase64;
-            imgEl.style.display = "block";
+            senaraiGuruDipilih.push(namaGuru);
+            selectElement.value = ""; // Reset dropdown pilihan
+            renderTags();
         }
 
-        const dataUnit = {
-            KURIKULUM: [
-                "Pengurusan Kurikulum", "Panitia Bahasa Melayu", "Panitia Bahasa Inggeris", 
-                "Panitia Matematik", "Panitia Sains", "Panitia Pendidikan Islam/Moral", 
-                "Panitia Bahasa Arab", "Panitia Pendidikan Jasmani dan Kesihatan", 
-                "Panitia Pendidikan Seni Visual", "Panitia Pendidikan Muzik"
-            ],
-            HEM: [
-                "Pengurusan HEM", "Unit Disiplin & Pengawas", "Unit Bimbingan & Kaunseling", 
-                "Unit Skim Pinjaman Buku Teks", "Unit Kantin", "Unit RMT", 
-                "Unit Kesihatan dan Keselamatan", "Unit Kebajikan dan Bantuan", 
-                "Unit APDM/IDME/Kehadiran Murid", "Unit Pendaftaran dan Penempatan", "Unit Lawatan"
-            ],
-            KOKURIKULUM: ["Pengurusan Kokurikulum"],
-            PENTADBIRAN: ["Mesyuarat Guru & Staf", "Mesyuarat Kewangan", "Mesyuarat JK Pengurusan"]
-        };
-
-        window.kemaskiniUnit = () => {
-            const kat = document.getElementById('kategoriUnit').value;
-            const det = document.getElementById('namaUnitDetail');
-            det.innerHTML = '<option value="">-- Pilih Unit --</option>';
-            if(dataUnit[kat]) dataUnit[kat].forEach(u => { det.innerHTML += `<option value="${u}">${u}</option>`; });
-        };
-
-        document.getElementById('namaUnitDetail').addEventListener('change', function() {
-            if(this.value) document.getElementById('tajuk').value = `Mesyuarat ${this.value} Bil 1/2026`;
-        });
-
-        // KAWALAN PILIHAN KEHADIRAN
-        let senaraiGuruDipilih = [];
-        window.tambahGuru = () => {
-            const selectEl = document.getElementById('teacherSelect');
-            if(!selectEl.value) return;
-            if(!senaraiGuruDipilih.includes(selectEl.value)) {
-                senaraiGuruDipilih.push(selectEl.value);
-                renderTags();
-            }
-            selectEl.value = "";
-        };
-        window.padamGuru = (nama) => {
+        // Fungsi Padam Guru Daripada Senarai Kehadiran
+        function buangNamaGuru(nama) {
             senaraiGuruDipilih = senaraiGuruDipilih.filter(g => g !== nama);
             renderTags();
-        };
-        function renderTags() {
-            const container = document.getElementById('selectedTeachersBox');
-            container.innerHTML = senaraiGuruDipilih.length === 0 ? `<span class="has-text-grey-light subtitle is-7">Belum ada pilihan dibuat. Sila klik dropdown di atas.</span>` : "";
-            senaraiGuruDipilih.forEach(guru => {
-                container.innerHTML += `<span class="tag is-info is-light teacher-tag">${guru}<button type="button" class="delete is-small" onclick="padamGuru('${guru}')"></button></span>`;
-            });
         }
 
-        // FUNGSI AGENDA DINAMIK
-        let counterAgenda = 1;
-        window.tambahKotakAgenda = () => {
+        // Fungsi Kemas Kini Paparan Tag Nama Guru & Kaunter Jumlah Hadir
+        function renderTags() {
+            const container = document.getElementById('kotakSenaraiHadir');
+            container.innerHTML = "";
+            
+            senaraiGuruDipilih.forEach(guru => {
+                const tagHTML = `
+                    <span class="tag is-info is-light teacher-tag">
+                        ${guru}
+                        <button type="button" class="delete is-small" onclick="buangNamaGuru('${guru}')"></button>
+                    </span>
+                `;
+                container.insertAdjacentHTML('beforeend', tagHTML);
+            });
+
+            document.getElementById('jumlahHadir').innerText = senaraiGuruDipilih.length;
+        }
+
+        // Fungsi Tambah Kotak Agenda Dinamik Secara Berterusan
+        function tambahKotakAgendaBaharu() {
             const container = document.getElementById('agendaContainer');
-            const htmlAgendaBaru = `
+            const itemHTML = `
                 <div class="agenda-item" data-index="${counterAgenda}">
-                    <button type="button" class="button is-small is-danger is-light btn-buang-agenda" onclick="buangKotakAgenda(${counterAgenda})">
-                        <i class="fas fa-trash"></i>
+                    <button type="button" class="button is-danger is-small btn-buang-agenda" onclick="buangKotakAgenda(this)">
+                        <span class="icon"><i class="fas fa-trash-alt"></i></span>
                     </button>
                     <div class="field">
                         <label class="label is-small">Tajuk Isu / Perkara / Agenda</label>
-                        <input class="input is-small agenda-tajuk" placeholder="Contoh: Perbincangan Aktiviti Sampingan" required>
+                        <input class="input is-small agenda-tajuk" placeholder="Nyatakan agenda atau perkara berbangkit..." required>
                     </div>
                     <div class="columns">
                         <div class="column is-8">
                             <label class="label is-small">Perincian Isu / Kandungan Agenda</label>
-                            <textarea class="textarea is-small agenda-isi" rows="3" placeholder="Nyatakan intipati perbincangan..." required></textarea>
+                            <textarea class="textarea is-small agenda-isi" rows="3" placeholder="Nyatakan keputusan perbincangan isu..." required></textarea>
                         </div>
                         <div class="column is-4">
                             <label class="label is-small">Tindakan / Makluman Kepada</label>
-                            <textarea class="textarea is-small agenda-tindakan" rows="3" placeholder="Contoh: Makluman semua guru" required></textarea>
+                            <textarea class="textarea is-small agenda-tindakan" rows="3" placeholder="Contoh: Makluman Semua Ahli" required></textarea>
                         </div>
                     </div>
                 </div>
             `;
-            container.insertAdjacentHTML('beforeend', htmlAgendaBaru);
+            container.insertAdjacentHTML('beforeend', itemHTML);
             counterAgenda++;
-        };
+        }
 
-        window.buangKotakAgenda = (index) => {
-            const item = document.querySelector(`.agenda-item[data-index="${index}"]`);
-            if(item) item.remove();
-        };
+        // Fungsi Buang Kotak Agenda Tertentu
+        function buangKotakAgenda(buttonElement) {
+            const agendaBox = buttonElement.closest('.agenda-item');
+            agendaBox.remove();
+        }
 
-        // SUBMIT & PROSES PDF
-        document.getElementById('minitForm').addEventListener('submit', async (e) => {
+        // PENGENDALIAN SUBMIT BORANG & PROSES GENERATE PDF MULTI-PAGE
+        document.getElementById('minitForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            if(senaraiGuruDipilih.length === 0) { alert("Sila tentukan maklumat kehadiran terlebih dahulu."); return; }
 
-            const agendaItems = document.querySelectorAll('.agenda-item');
-            let senaraiAgendaPayload = [];
-            agendaItems.forEach(item => {
-                senaraiAgendaPayload.push({
+            if (senaraiGuruDipilih.length === 0) {
+                alert("Sila pilih dan tambah sekurang-kurangnya seorang ahli mesyuarat yang hadir!");
+                return;
+            }
+
+            // Membina Objek Payload Data Borang
+            const agendaElements = document.querySelectorAll('.agenda-item');
+            const senaraiAgendaData = [];
+
+            agendaElements.forEach(item => {
+                senaraiAgendaData.push({
                     sub_tajuk: item.querySelector('.agenda-tajuk').value,
                     sub_isi: item.querySelector('.agenda-isi').value,
                     sub_tindakan: item.querySelector('.agenda-tindakan').value
                 });
             });
 
-            const guruTidakHadirTeks = document.getElementById('tidakHadir').value || "Tiada / Penuh";
-
             const payload = {
+                tajuk: document.getElementById('tajukMesyuarat').value,
+                rujukan: document.getElementById('rujukanFail').value,
+                tarikh: document.getElementById('tarikhMesyuarat').value,
+                masa: document.getElementById('masaMesyuarat').value,
+                tempat: document.getElementById('tempatMesyuarat').value,
                 kategori: document.getElementById('kategoriUnit').value,
-                unit: document.getElementById('namaUnitDetail').value,
-                tajuk: document.getElementById('tajuk').value,
-                rujukan: document.getElementById('rujukanFail').value || "Tiada Rujukan",
-                tarikh: document.getElementById('tarikh').value,
-                masa: document.getElementById('masa').value,
-                tempat: document.getElementById('tempat').value,
-                pengerusi: document.getElementById('pengerusi').value,
-                setiausaha: document.getElementById('setiausaha').value,
+                pengerusi: document.getElementById('pengerusiMesyuarat').value,
+                setiausaha: document.getElementById('setiausahaMesyuarat').value,
+                tidak_hadir: document.getElementById('tidakHadirMesyuarat').value || "Tiada",
                 kehadiran: senaraiGuruDipilih,
-                tidak_hadir: guruTidakHadirTeks,
-                perutusan_pengerusi: document.getElementById('perutusan').value,
-                senarai_agenda: senaraiAgendaPayload,
-                tarikh_diisi: new Date().toISOString()
+                senarai_agenda: senaraiAgendaData
             };
 
-            try { await addDoc(collection(db, "minit_mesyuarat"), payload); } catch (err) { console.error("Ralat Firebase:", err); }
-
-// =================================================================
-            // PENJANAAN PDF FORMAT MULTI-PAGE KPM DENGAN LOGO (DIKEMAS KINI)
+            // =================================================================
+            // PROSES JANA PDF MENGGUNAKAN ELEMEN LOGO RASMI (DIKEMAS KINI)
             // =================================================================
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'pt', 'a4');
 
-            let startTableY = 165; // Menurunkan kedudukan permulaan jadual agar memberikan ruang kepada logo di atas
+            let startTableY = 165; // Ruang keselamatan bahagian atas (Header KPM)
 
-            // Menyuntik Logo Sekolah ke dalam fail PDF menggunakan elemen HTML langsung
+            // Mengambil elemen gambar logo sekolah secara terus dari struktur DOM HTML
             const logoImg = document.getElementById('logoSekolah');
             if (logoImg) {
                 try {
-                    // Letak logo di bahagian atas tengah (X: 262.5, Y: 20, Lebar: 70, Tinggi: 70)
+                    // Menyuntik imej lokal ke PDF (Tengah Atas: X=262.5, Y=20, Lebar=70, Tinggi=70)
                     doc.addImage(logoImg, 'PNG', 262.5, 20, 70, 70);
-                } catch(e) {
-                    console.error("Gagal menyuntik logo ke PDF:", e);
+                } catch(err) {
+                    console.error("Gagal menyuntik imej logo ke dalam fail PDF:", err);
                 }
             }
 
+            // Tetapan Teks Tajuk Surat Minit Mesyuarat Rasmi
             doc.setFont("Helvetica", "bold");
             doc.setFontSize(13);
             doc.text("MINIT MESYUARAT SESI PERSEKOLAHAN 2026", 297, startTableY - 50, { align: "center" });
             doc.text("SK SIMPANG RENGAM", 297, startTableY - 32, { align: "center" });
 
+            // Pemformatan Senarai Nama Kehadiran Secara Berbaris (Numbered List)
             let teksKehadiranDiformat = "";
             payload.kehadiran.forEach((g, idx) => { teksKehadiranDiformat += `${idx + 1}. ${g}\n`; });
             
+            // Format Tarikh Dari YYYY-MM-DD Kepada DD/MM/YYYY
             const tarikhDiformat = payload.tarikh.split('-').reverse().join('/');
 
+            // Pembuatan Jadual Maklumat Asas Minit (Table 1)
             doc.autoTable({
                 startY: startTableY,
                 theme: 'plain',
@@ -387,6 +434,7 @@
                 ]
             });
 
+            // Pembinaan Susunan Kandungan Minit Mesyuarat (Table 2 - Isi Minit)
             let susunanBarisIsi = [
                 [
                     { content: '1', styles: { halign: 'center' } }, 
@@ -395,6 +443,7 @@
                 ]
             ];
 
+            // Melakukan pusingan (looping) untuk memasukkan agenda dinamik ke dalam jadual PDF
             payload.senarai_agenda.forEach((agenda, index) => {
                 susunanBarisIsi.push([
                     { content: (index + 2).toString(), styles: { halign: 'center' } },
@@ -403,6 +452,7 @@
                 ]);
             });
 
+            // Memaparkan Jadual Kandungan Utama Minit
             doc.autoTable({
                 startY: doc.lastAutoTable.finalY + 15,
                 theme: 'plain',
@@ -417,6 +467,7 @@
                 body: susunanBarisIsi
             });
 
+            // Penentuan Kedudukan Dan Ruang Tandatangan Urus Setia (Footer)
             let finalY = doc.lastAutoTable.finalY + 30;
             if (finalY > 730) { 
                 doc.addPage(); 
@@ -427,6 +478,7 @@
             doc.setFontSize(10);
             doc.text("Disediakan oleh:", 50, finalY);
             
+            // Garis Tandatangan Putus-Putus
             doc.setLineDashPattern([3, 3], 0);
             doc.line(50, finalY + 45, 250, finalY + 45);
             
@@ -436,27 +488,28 @@
             doc.text("Setiausaha Mesyuarat", 50, finalY + 72);
             doc.text("SK Simpang Rengam", 50, finalY + 84);
 
+            // Simpan Dokumen Ke Komputer Pengguna Secara Automatik
             doc.save(`Minit_${payload.tajuk.replace(/\s+/g, '_')}.pdf`);
             alert("Berjaya disimpan! Fail PDF beserta Logo Rasmi Sekolah telah dimuat turun.");
 
             // =================================================================
-            // RESET BORANG KEMBALI KEDADA ASAL SETELAH SELESAI
+            // RESET BORANG KEMBALI KEDADA ASAL SETELAH SELESAI JANA PDF
             // =================================================================
             document.getElementById('minitForm').reset();
             document.getElementById('agendaContainer').innerHTML = `
                 <div class="agenda-item" data-index="0">
                     <div class="field">
                         <label class="label is-small">Tajuk Isu / Perkara / Agenda</label>
-                        <input class="input is-small agenda-tajuk" placeholder="Contoh: Analisis Pencapaian Akademik 2025" required>
+                        <input class="input is-small agenda-tajuk" placeholder="Contoh: Analisis Pencapaian Akademik Konten PIT1 2026" required>
                     </div>
                     <div class="columns">
                         <div class="column is-8">
                             <label class="label is-small">Perincian Isu / Kandungan Agenda</label>
-                            <textarea class="textarea is-small agenda-isi" rows="3" placeholder="Nyatakan intipati perbincangan..." required></textarea>
+                            <textarea class="textarea is-small agenda-isi" rows="3" placeholder="Nyatakan perkara yang dibincangkan serta keputusan mesyuarat..." required></textarea>
                         </div>
                         <div class="column is-4">
                             <label class="label is-small">Tindakan / Makluman Kepada</label>
-                            <textarea class="textarea is-small agenda-tindakan" rows="3" placeholder="Contoh: Semua guru / Panitia berkaitan" required></textarea>
+                            <textarea class="textarea is-small agenda-tindakan" rows="3" placeholder="Contoh: Semua Guru / KP Mata Pelajaran" required></textarea>
                         </div>
                     </div>
                 </div>
@@ -467,4 +520,4 @@
         });
     </script>
 </body>
-</html>                                                              
+</html>
