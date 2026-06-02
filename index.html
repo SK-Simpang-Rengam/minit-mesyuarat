@@ -13,11 +13,29 @@
     <style>
         :root { --primary-color: #1e3a8a; }
         body { background-color: #f4f7fa; padding: 20px; font-family: 'Segoe UI', sans-serif; }
-        .form-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); max-width: 800px; margin: 0 auto; }
+        .form-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); max-width: 850px; margin: 0 auto; }
         .form-header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #edf2f7; padding-bottom: 15px; }
-        #pdfTemplate { position: absolute; left: -9999px; width: 700px; padding: 40px; background: white; color: black; line-height: 1.6; }
-        .pdf-header { text-align: center; font-weight: bold; border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 20px; font-size: 14pt; }
-        .pdf-section { font-weight: bold; margin-top: 15px; margin-bottom: 5px; text-transform: uppercase; border-bottom: 1px solid #000; }
+        
+        /* Gaya Kotak Pilihan Kehadiran Guru */
+        .kehadiran-box { border: 1px solid #dbdbdb; border-radius: 4px; padding: 10px; min-height: 60px; background: #fff; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 5px; }
+        .teacher-tag { margin: 2px; }
+
+        /* GAYA TEMPLAT PDF MENGIKUT JADUAL KPM */
+        #pdfTemplate { position: absolute; left: -9999px; width: 750px; padding: 35px; background: white; color: black; font-family: Arial, sans-serif; font-size: 11pt; }
+        .pdf-logo-area { text-align: center; margin-bottom: 15px; }
+        .pdf-logo-area img { height: 80px; width: auto; object-fit: contain; }
+        .pdf-main-title { text-align: center; font-weight: bold; font-size: 13pt; text-transform: uppercase; margin-bottom: 5px; }
+        .pdf-sub-title { text-align: center; font-weight: bold; font-size: 12pt; text-transform: uppercase; margin-bottom: 20px; }
+        
+        .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; table-layout: fixed; }
+        .pdf-table th, .pdf-table td { border: 1.5px solid black; padding: 8px; vertical-align: top; text-align: left; color: black; }
+        .bg-grey { background-color: #f2f2f2; font-weight: bold; text-align: center !important; text-transform: uppercase; }
+        .text-center { text-align: center !important; }
+        .font-bold { font-weight: bold; }
+        
+        .sign-section { margin-top: 40px; width: 100%; display: flex; justify-content: space-between; }
+        .sign-block { width: 45%; }
+        .sign-space { margin-top: 50px; border-bottom: 1px dashed black; width: 220px; display: block; }
     </style>
 </head>
 <body>
@@ -28,15 +46,16 @@
         </div>
 
         <form id="minitForm">
+            <!-- Pilihan Kategori & Unit (Dropdown Automatik) -->
             <div class="columns">
                 <div class="column is-4">
                     <div class="field">
                         <label class="label">Kategori Unit</label>
                         <div class="select is-fullwidth">
                             <select id="kategoriUnit" onchange="kemaskiniUnit()" required>
-                                <option value="">-- Pilih --</option>
+                                <option value="">-- Pilih Kategori --</option>
                                 <option value="KURIKULUM">Kurikulum</option>
-                                <option value="HEM">HEM</option>
+                                <option value="HEM">Hal Ehwal Murid</option>
                                 <option value="KOKURIKULUM">Kokurikulum</option>
                                 <option value="PENTADBIRAN">Pentadbiran</option>
                             </select>
@@ -55,11 +74,23 @@
                 </div>
             </div>
 
-            <div class="field">
-                <label class="label">Tajuk Penuh Mesyuarat</label>
-                <input class="input" id="tajuk" placeholder="Contoh: Mesyuarat Panitia Sains Bil 1/2026" required>
+            <!-- Tajuk & Rujukan -->
+            <div class="columns">
+                <div class="column is-8">
+                    <div class="field">
+                        <label class="label">Tajuk Penuh Mesyuarat</label>
+                        <input class="input" id="tajuk" placeholder="Contoh: Mesyuarat Panitia Bahasa Melayu Bil 1/2026" required>
+                    </div>
+                </div>
+                <div class="column is-4">
+                    <div class="field">
+                        <label class="label">Rujukan Fail</label>
+                        <input class="input" id="rujukanFail" placeholder="Contoh: SKSR.600-2/1/1" required>
+                    </div>
+                </div>
             </div>
 
+            <!-- Tarikh, Masa, Tempat -->
             <div class="columns">
                 <div class="column">
                     <label class="label">Tarikh</label>
@@ -69,58 +100,158 @@
                     <label class="label">Masa</label>
                     <input class="input" id="masa" placeholder="Contoh: 1:30 PM" required>
                 </div>
+                <div class="column">
+                    <label class="label">Tempat / Platform</label>
+                    <input class="input" id="tempat" placeholder="Contoh: Bilik Mesyuarat Aula Perdana" required>
+                </div>
+            </div>
+
+            <!-- Pengerusi & Urus Setia -->
+            <div class="columns">
+                <div class="column">
+                    <div class="field">
+                        <label class="label">Pengerusi Mesyuarat</label>
+                        <input class="input" id="pengerusi" placeholder="Nama Pengerusi" required>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="field">
+                        <label class="label">Disediakan Oleh (Setiausaha)</label>
+                        <input class="input" id="setiausaha" placeholder="Nama Setiausaha / Pencatat" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL KEHADIRAN GURU (DROPDOWN + TAGS) -->
+            <div class="field">
+                <label class="label">Senarai Kehadiran Guru</label>
+                <div class="columns is-mobile is-gapless mb-2">
+                    <div class="column">
+                        <div class="select is-fullwidth">
+                            <select id="teacherSelect" onchange="tambahGuru()">
+                                <option value="">-- Klik Untuk Pilih Nama Guru --</option>
+                                <!-- Nama guru contoh boleh ditambah di bawah mengikut keperluan -->
+                                <option value="MOHDRAFWAN">Mohdrafwan</option>
+                                <option value="AZIZAH BINTI SHARIFF">Azizah binti Shariff</option>
+                                <option value="JEHAN ADIBA BINTI AHMAD TAHA">Jehan Adiba binti Ahmad Taha</option>
+                                <option value="NORHANIZA BINTI HASHAM @ HISAM">Norhaniza binti Hasham @ Hisam</option>
+                                <option value="ZURIAZANI BIN MAT YAJID">Zuriazani bin Mat Yajid</option>
+                                <option value="NURULZALIA BINTI MUHAMMAD RAMLI">Nurulzalia binti Muhammad Ramli</option>
+                                <option value="MOHD KHAIRUNNASRI BIN ABD SALAM">Mohd Khairunnasri bin Abd Salam</option>
+                                <option value="NOR AZALI BIN DOLAH">Nor Azali bin Dolah</option>
+                                <option value="SEMUA GURU">Semua Guru</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <!-- Kotak paparan nama guru yang dipilih -->
+                <div class="kehadiran-box" id="selectedTeachersBox">
+                    <span class="has-text-grey-light subtitle is-7" id="placeholderText">Belum ada guru dipilih. Klik dropdown di atas.</span>
+                </div>
+            </div>
+
+            <!-- Kandungan Utama -->
+            <div class="field">
+                <label class="label">Ucapan Alu-aluan Pengerusi</label>
+                <textarea class="textarea" id="perutusan" rows="3" placeholder="Isi perutusan atau alu-aluan pengerusi..." required></textarea>
             </div>
 
             <div class="field">
-                <label class="label">Pengerusi Mesyuarat</label>
-                <input class="input" id="pengerusi" placeholder="Nama Guru Besar / GPK" required>
+                <label class="label">Perkara / Isu Baharu (Agenda)</label>
+                <textarea class="textarea" id="perbincangan" rows="5" placeholder="Nyatakan perkara atau pengisian utama agenda..." required></textarea>
             </div>
 
             <div class="field">
-                <label class="label">Senarai Kehadiran</label>
-                <textarea class="textarea" id="kehadiran" rows="3" placeholder="1. Nama Guru..." required></textarea>
-            </div>
-
-            <div class="field">
-                <label class="label">Isi Perbincangan / Agenda</label>
-                <textarea class="textarea" id="perbincangan" rows="6" placeholder="Nyatakan perkara yang dibincangkan..." required></textarea>
-            </div>
-
-            <div class="field">
-                <label class="label">Tindakan / Hal-Hal Lain</label>
-                <textarea class="textarea" id="tindakan" rows="3" placeholder="Tindakan susulan jika ada..."></textarea>
+                <label class="label">Tindakan / Makluman</label>
+                <textarea class="textarea" id="tindakan" rows="3" placeholder="Nyatakan pihak bertanggungjawab (Contoh: Semua guru / Panitia berkaitan)..." required></textarea>
             </div>
 
             <button type="submit" class="button is-link is-fullwidth is-large mt-4">
-                <i class="fas fa-file-pdf mr-2"></i> SIMPAN & JANA PDF
+                <i class="fas fa-file-pdf mr-2"></i> SIMPAN & JANA PDF JADUAL
             </button>
         </form>
     </div>
 
-    <!-- TEMPLAT PDF TERSEMBUNYI -->
+    <!-- TEMPLAT PDF JADUAL PROFESIONAL MENGIKUT GAMBAR 2 -->
     <div id="pdfTemplate">
-        <div class="pdf-header">MINIT MESYUARAT SK SIMPANG RENGAM<br><span id="pTajuk"></span></div>
-        <p><strong>Tarikh:</strong> <span id="pTarikh"></span> | <strong>Masa:</strong> <span id="pMasa"></span></p>
-        <p><strong>Pengerusi:</strong> <span id="pPengerusi"></span></p>
-        
-        <div class="pdf-section">1. Perutusan Pengerusi / Kehadiran</div>
-        <p id="pKehadiran" style="white-space: pre-line; padding-left: 15px;"></p>
+        <!-- Ruangan Header Sekolah & Logo Placeholder -->
+        <div class="pdf-logo-area">
+            <div style="font-weight: bold; font-size: 26pt; color: #1e3a8a; margin-bottom: 5px;"><i class="fas fa-graduation-cap"></i></div>
+            <div class="pdf-main-title">MINIT MESYUARAT SESI PERSEKOLAHAN 2026</div>
+            <div class="pdf-sub-title">SK SIMPANG RENGAM</div>
+        </div>
 
-        <div class="pdf-section">2. Perkara Baharu / Perbincangan Agenda</div>
-        <p id="pIsi" style="white-space: pre-line; padding-left: 15px;"></p>
+        <!-- Jadual Profil Mesyuarat -->
+        <table class="pdf-table">
+            <tr>
+                <td class="font-bold text-center" style="width: 15%;">PERKARA</td>
+                <td id="pPerkara" style="width: 45%;"></td>
+                <td class="font-bold text-center" style="width: 15%;">TARIKH</td>
+                <td id="pTarikh" style="width: 25%;"></td>
+            </tr>
+            <tr>
+                <td class="font-bold text-center">RUJ FAIL</td>
+                <td id="pRuj"></td>
+                <td class="font-bold text-center">MASA</td>
+                <td id="pMasa"></td>
+            </tr>
+            <tr>
+                <td class="font-bold text-center">TEMPAT</td>
+                <td id="pTempat"></td>
+                <td class="font-bold text-center">ANJURAN</td>
+                <td id="pAnjuran"></td>
+            </tr>
+            <tr>
+                <td class="font-bold text-center" style="vertical-align: middle;">KEHADIRAN</td>
+                <td id="pKehadiran" colspan="3" style="line-height: 1.5;"></td>
+            </tr>
+        </table>
 
-        <div class="pdf-section">3. Tindakan / Hal-Hal Lain</div>
-        <p id="pTindakan" style="white-space: pre-line; padding-left: 15px;"></p>
-        
-        <br><br>
-        <p>Disediakan oleh Setiausaha Mesyuarat.</p>
+        <!-- Jadual Isi Agenda & Tindakan -->
+        <table class="pdf-table">
+            <thead>
+                <tr class="bg-grey">
+                    <th style="width: 8%; text-align: center;">BIL.</th>
+                    <th style="width: 62%; text-align: center;">PERKARA / ISU</th>
+                    <th style="width: 30%; text-align: center;">TINDAKAN / MAKLUMAN</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="text-center">1</td>
+                    <td>
+                        <div class="font-bold">UCAPAN ALU-ALUAN PENGERUSI</div>
+                        <p id="pPerutusan" style="white-space: pre-line; margin-top: 5px; padding-left: 5px;"></p>
+                    </td>
+                    <td style="vertical-align: middle; text-align: center;">Pengerusi / Makluman</td>
+                </tr>
+                <tr>
+                    <td class="text-center">2</td>
+                    <td>
+                        <div class="font-bold" id="pAgendaHeader">PERKARA BAHARU / PERBINCANGAN AGENDA</div>
+                        <p id="pIsi" style="white-space: pre-line; margin-top: 5px; padding-left: 5px;"></p>
+                    </td>
+                    <td id="pTindakanField" style="vertical-align: middle; text-align: center; white-space: pre-line;"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Seksyen Tandatangan Disediakan Oleh -->
+        <div class="sign-section">
+            <div class="sign-block">
+                <p>Disediakan oleh:</p>
+                <span class="sign-space"></span>
+                <p style="margin-top: 5px;"><span id="pSetiausaha" class="font-bold"></span></p>
+                <p>Setiausaha Mesyuarat</p>
+                <p>SK Simpang Rengam</p>
+            </div>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Konfigurasi Firebase Anda yang Sebenar
         const firebaseConfig = {
             apiKey: "AIzaSyCRJOiazrnB36Gfsr3chXsyuKN3W4Bw1EY",
             authDomain: "minit-mesyuarat-sksr.firebaseapp.com",
@@ -134,59 +265,149 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // DATA DROPDOWN MENGIKUT PERMINTAAN ANDA
         const dataUnit = {
-            KURIKULUM: ["Panitia Bahasa Melayu", "Panitia Bahasa Inggeris", "Panitia Sains", "Panitia Matematik", "Panitia Pendidikan Islam"],
-            HEM: ["Unit Disiplin & Pengawas", "Unit Kantin", "Unit SPBT", "Unit Kebajikan"],
-            KOKURIKULUM: ["Kelab Bola Sepak", "Kelab Bola Jaring", "Kelab Sains & Matematik", "Persatuan Pengakap", "BSMM"],
-            PENTADBIRAN: ["Mesyuarat Guru & Staf", "Mesyuarat Kewangan", "Mesyuarat JK Pengurusan"]
+            KURIKULUM: [
+                "Pengurusan Kurikulum", "Panitia Bahasa Melayu", "Panitia Bahasa Inggeris", 
+                "Panitia Matematik", "Panitia Sains", "Panitia Pendidikan Islam/Moral", 
+                "Panitia Bahasa Arab", "Panitia Pendidikan Jasmani dan Kesihatan", 
+                "Panitia Pendidikan Seni Visual", "Panitia Pendidikan Muzik"
+            ],
+            HEM: [
+                "Pengurusan HEM", "Unit Disiplin & Pengawas", "Unit Bimbingan & Kaunseling", 
+                "Unit Skim Pinjaman Buku Teks", "Unit Kantin", "Unit RMT", 
+                "Unit Kesihatan dan Keselamatan", "Unit Kebajikan dan Bantuan", 
+                "Unit APDM/IDME/Kehadiran Murid", "Unit Pendaftaran dan Penempatan", "Unit Lawatan"
+            ],
+            KOKURIKULUM: [
+                "Pengurusan Kokurikulum"
+            ],
+            PENTADBIRAN: [
+                "Mesyuarat Guru & Staf", "Mesyuarat Kewangan", "Mesyuarat JK Pengurusan"
+            ]
         };
 
         window.kemaskiniUnit = () => {
             const kat = document.getElementById('kategoriUnit').value;
             const det = document.getElementById('namaUnitDetail');
             det.innerHTML = '<option value="">-- Pilih Unit --</option>';
-            if(dataUnit[kat]) dataUnit[kat].forEach(u => { det.innerHTML += `<option value="${u}">${u}</option>`; });
+            if(dataUnit[kat]) {
+                dataUnit[kat].forEach(u => { det.innerHTML += `<option value="${u}">${u}</option>`; });
+            }
         };
 
         document.getElementById('namaUnitDetail').addEventListener('change', function() {
-            if(this.value) document.getElementById('tajuk').value = `Mesyuarat ${this.value} Bil 1/2026`;
+            if(this.value) {
+                document.getElementById('tajuk').value = `Mesyuarat ${this.value} Bil 1/2026`;
+            }
         });
 
+        // STRUKTUR PENGURUSAN TAG KEHADIRAN GURU
+        let senaraiGuruDipilih = [];
+
+        window.tambahGuru = () => {
+            const selectEl = document.getElementById('teacherSelect');
+            const namaGuru = selectEl.value;
+            if(!namaGuru) return;
+
+            if(!senaraiGuruDipilih.includes(namaGuru)) {
+                senaraiGuruDipilih.push(namaGuru);
+                renderTags();
+            }
+            selectEl.value = ""; // Reset dropdown selection
+        };
+
+        window.padamGuru = (nama) => {
+            senaraiGuruDipilih = senaraiGuruDipilih.filter(g => g !== nama);
+            renderTags();
+        };
+
+        function renderTags() {
+            const container = document.getElementById('selectedTeachersBox');
+            container.innerHTML = "";
+            
+            if(senaraiGuruDipilih.length === 0) {
+                container.innerHTML = `<span class="has-text-grey-light subtitle is-7" id="placeholderText">Belum ada guru dipilih. Klik dropdown di atas.</span>`;
+                return;
+            }
+
+            senaraiGuruDipilih.forEach(guru => {
+                container.innerHTML += `
+                    <span class="tag is-info is-light teacher-tag">
+                        ${guru}
+                        <button type="button" class="delete is-small" onclick="padamGuru('${guru}')"></button>
+                    </span>
+                `;
+            });
+        }
+
+        // ATURAN SUBMIT & PROSES PDF JADUAL JPM
         document.getElementById('minitForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            if(senaraiGuruDipilih.length === 0) {
+                alert("Sila pilih sekurang-kurangnya seorang kehadiran guru.");
+                return;
+            }
+
             const payload = {
                 kategori: document.getElementById('kategoriUnit').value,
                 unit: document.getElementById('namaUnitDetail').value,
                 tajuk: document.getElementById('tajuk').value,
+                rujukan: document.getElementById('rujukanFail').value || "Tiada Rujukan",
                 tarikh: document.getElementById('tarikh').value,
                 masa: document.getElementById('masa').value,
+                tempat: document.getElementById('tempat').value,
                 pengerusi: document.getElementById('pengerusi').value,
-                kehadiran: document.getElementById('kehadiran').value,
+                setiausaha: document.getElementById('setiausaha').value,
+                kehadiran: senaraiGuruDipilih,
+                perutusan: document.getElementById('perutusan').value,
                 isi: document.getElementById('perbincangan').value,
                 tindakan: document.getElementById('tindakan').value,
                 tarikh_diisi: new Date().toISOString()
             };
 
+            // Simpan Ke Firebase Firestore
             try {
                 await addDoc(collection(db, "minit_mesyuarat"), payload);
-            } catch (err) { console.error("Ralat simpan Firebase:", err); }
+            } catch (err) { console.error("Ralat Firebase:", err); }
 
-            // Mapping data ke templat PDF
-            document.getElementById('pTajuk').innerText = payload.tajuk;
+            // Suntik Data Ke Templat Struktur Jadual PDF
+            document.getElementById('pPerkara').innerText = payload.tajuk.toUpperCase();
             document.getElementById('pTarikh').innerText = payload.tarikh.split('-').reverse().join('/');
-            document.getElementById('pMasa').innerText = payload.masa;
-            document.getElementById('pPengerusi').innerText = payload.pengerusi;
-            document.getElementById('pKehadiran').innerText = payload.kehadiran;
+            document.getElementById('pRuj').innerText = payload.rujukan;
+            document.getElementById('pMasa').innerText = payload.masa.toUpperCase();
+            document.getElementById('pTempat').innerText = payload.tempat.toUpperCase();
+            document.getElementById('pAnjuran').innerText = `UNIT ${payload.kategori} SKSR`;
+            document.getElementById('pSetiausaha').innerText = payload.setiausaha.toUpperCase();
+            document.getElementById('pPerutusan').innerText = payload.perutusan;
             document.getElementById('pIsi').innerText = payload.isi;
-            document.getElementById('pTindakan').innerText = payload.tindakan || "Tiada tindakan susulan.";
+            document.getElementById('pTindakanField').innerText = payload.tindakan || "Makluman";
+            document.getElementById('pAgendaHeader').innerText = `ANALISIS / PERBINCANGAN AGENDA ${payload.unit.toUpperCase()}`;
 
+            // Susun nama guru menggunakan senarai bernombor di PDF
+            let teksKehadiran = "";
+            payload.kehadiran.forEach((g, indeks) => {
+                teksKehadiran += `${indeks + 1}. ${g}\n`;
+            });
+            document.getElementById('pKehadiran').innerText = teksKehadiran;
+
+            // Proses Penghasilan Fail PDF
             const { jsPDF } = window.jspdf;
-            html2canvas(document.getElementById('pdfTemplate'), { scale: 2 }).then(canvas => {
+            html2canvas(document.getElementById('pdfTemplate'), { scale: 2, useCORS: true }).then(canvas => {
                 const doc = new jsPDF('p', 'pt', 'a4');
-                doc.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 595, (canvas.height * 595) / canvas.width);
+                const imgWidth = 595; 
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                
+                doc.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
                 doc.save(`Minit_${payload.tajuk.replace(/\s+/g, '_')}.pdf`);
-                alert("Berjaya disimpan dan PDF dimuat turun!");
+                
+                alert("Minit berjaya disimpan ke Firebase dan PDF Profesional dimuat turun!");
+                
+                // Reset Borang
                 document.getElementById('minitForm').reset();
+                senaraiGuruDipilih = [];
+                renderTags();
             });
         });
     </script>
