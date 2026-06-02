@@ -4,93 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Minit SK Simpang Rengam</title>
-    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-
     <style>
-        :root { 
-            --primary-color: #1e3a8a; 
-        }
+        :root { --primary-color: #1e3a8a; }
+        body { background-color: #f4f7fa; padding: 20px; font-family: 'Segoe UI', sans-serif; }
+        .form-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); max-width: 850px; margin: 0 auto; }
         
-        body { 
-            background-color: #f4f7fa; 
-            padding: 20px; 
-            font-family: 'Segoe UI', sans-serif; 
-        }
+        /* Gaya Pengepala Borang - Diperbaiki Menggunakan Flexbox */
+        .form-header { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 25px; border-bottom: 2px solid #edf2f7; padding-bottom: 15px; }
+        .form-logo { width: 70px; height: auto; flex-shrink: 0; }
+        .form-title-area { text-align: left; }
         
-        .form-container { 
-            background: white; 
-            padding: 30px; 
-            border-radius: 15px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
-            max-width: 850px; 
-            margin: 0 auto; 
-        }
-        
-        /* Gaya Pengepala Borang - Diperbaiki menggunakan Flexbox */
-        .form-header { 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px; /* Jarak selamat antara logo dan teks tajuk */
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 3px double var(--primary-color);
-        }
-
-        .form-header img {
-            width: 80px; /* Saiz ideal logo sekolah */
-            height: auto;
-            flex-shrink: 0; /* Mengelakkan imej terpenyet pada skrin telefon */
-        }
-
-        .form-title-area {
-            text-align: left;
-        }
-        
-        /* Pengurusan Kehadiran Guru */
-        .kehadiran-box { 
-            border: 1px solid #dbdbdb; 
-            border-radius: 4px; 
-            padding: 10px; 
-            min-height: 60px; 
-            background: #fff; 
-            margin-bottom: 10px; 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 5px; 
-        }
-        
-        .teacher-tag { 
-            margin: 2px; 
-        }
+        /* Pengurusan Kehadiran */
+        .kehadiran-box { border: 1px solid #dbdbdb; border-radius: 4px; padding: 10px; min-height: 60px; background: #fff; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 5px; }
+        .teacher-tag { margin: 2px; }
 
         /* Kotak Agenda Dinamik */
-        .agenda-item { 
-            background: #f9fafb; 
-            border: 1px solid #e5e7eb; 
-            padding: 15px; 
-            border-radius: 8px; 
-            margin-bottom: 15px; 
-            position: relative; 
-        }
-        
-        .btn-buang-agenda { 
-            position: absolute; 
-            top: 10px; 
-            right: 10px; 
-        }
+        .agenda-item { background: #f9fafb; border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px; margin-bottom: 15px; position: relative; }
+        .btn-buang-agenda { position: absolute; top: 10px; right: 10px; }
     </style>
 </head>
 <body>
-
     <div class="form-container">
         <div class="form-header">
-            <img src="logo_sksr.png" id="logoSekolah" alt="Logo SK Simpang Rengam">
+            <img src="logo_sksr.png" class="form-logo" id="logoSekolah" alt="Logo SK Simpang Rengam">
             <div class="form-title-area">
                 <h1 class="title is-4 mb-1" style="color: var(--primary-color);">SISTEM E-MINIT MESYUARAT</h1>
                 <p class="subtitle is-6 has-text-grey mb-0">SK Simpang Rengam</p>
@@ -99,141 +39,116 @@
 
         <form id="minitForm">
             <div class="columns">
+                <div class="column is-4">
+                    <div class="field">
+                        <label class="label">Kategori Unit</label>
+                        <div class="select is-fullwidth">
+                            <select id="kategoriUnit" onchange="kemaskiniUnit()" required>
+                                <option value="">-- Pilih Kategori --</option>
+                                <option value="KURIKULUM">Kurikulum</option>
+                                <option value="HEM">Hal Ehwal Murid</option>
+                                <option value="KOKURIKULUM">Kokurikulum</option>
+                                <option value="PENTADBIRAN">Pentadbiran</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
                 <div class="column is-8">
                     <div class="field">
-                        <label class="label is-small">Tajuk / Nama Mesyuarat</label>
-                        <div class="control">
-                            <input class="input is-small" id="tajukMesyuarat" placeholder="Contoh: Mesyuarat Jawatankuasa Kurikulum Bil 1/2026" required>
+                        <label class="label">Nama Unit / Panitia / Kelab</label>
+                        <div class="select is-fullwidth">
+                            <select id="namaUnitDetail" required>
+                                <option value="">-- Sila Pilih Kategori Dahulu --</option>
+                            </select>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="columns">
+                <div class="column is-8">
+                    <div class="field">
+                        <label class="label">Tajuk Penuh Mesyuarat</label>
+                        <input class="input" id="tajuk" placeholder="Contoh: Mesyuarat Panitia Bahasa Melayu Bil 1/2026" required>
                     </div>
                 </div>
                 <div class="column is-4">
                     <div class="field">
-                        <label class="label is-small">Rujukan Fail</label>
-                        <div class="control">
-                            <input class="input is-small" id="rujukanFail" placeholder="Contoh: SKSR.600-3/2/1(1)" required>
-                        </div>
+                        <label class="label">Rujukan Fail</label>
+                        <input class="input" id="rujukanFail" placeholder="Contoh: SKSR.600-2/1/1" required>
                     </div>
                 </div>
             </div>
 
             <div class="columns">
-                <div class="column is-3">
-                    <div class="field">
-                        <label class="label is-small">Tarikh</label>
-                        <div class="control">
-                            <input class="input is-small" type="date" id="tarikhMesyuarat" required>
-                        </div>
-                    </div>
+                <div class="column">
+                    <label class="label">Tarikh</label>
+                    <input class="input" type="date" id="tarikh" required>
                 </div>
-                <div class="column is-3">
-                    <div class="field">
-                        <label class="label is-small">Masa</label>
-                        <div class="control">
-                            <input class="input is-small" type="text" id="masaMesyuarat" placeholder="Contoh: 2:00 Petang" required>
-                        </div>
-                    </div>
+                <div class="column">
+                    <label class="label">Masa</label>
+                    <input class="input" id="masa" placeholder="Contoh: 1:30 PM" required>
                 </div>
-                <div class="column is-3">
-                    <div class="field">
-                        <label class="label is-small">Tempat</label>
-                        <div class="control">
-                            <input class="input is-small" type="text" id="tempatMesyuarat" placeholder="Contoh: Bilik Mesyuarat Al-Farabi" required>
-                        </div>
-                    </div>
-                </div>
-                <div class="column is-3">
-                    <div class="field">
-                        <label class="label is-small">Kategori / Unit Anjuran</label>
-                        <div class="control">
-                            <div class="select is-small is-fullwidth">
-                                <select id="kategoriUnit">
-                                    <option value="KURIKULUM">KURIKULUM</option>
-                                    <option value="HAL EHWAL MURID">HAL EHWAL MURID (HEM)</option>
-                                    <option value="KOKURIKULUM">KOKURIKULUM</option>
-                                    <option value="PENTADBIRAN">PENTADBIRAN</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+                <div class="column">
+                    <label class="label">Tempat / Platform</label>
+                    <input class="input" id="tempat" placeholder="Contoh: Bilik Mesyuarat Aula Perdana" required>
                 </div>
             </div>
 
-            <hr style="margin: 15px 0; background-color: #eee;">
+            <div class="columns">
+                <div class="column">
+                    <div class="field">
+                        <label class="label">Pengerusi Mesyuarat</label>
+                        <input class="input" id="pengerusi" placeholder="Nama Pengerusi" required>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="field">
+                        <label class="label">Disediakan Oleh (Setiausaha)</label>
+                        <input class="input" id="setiausaha" placeholder="Nama Setiausaha" required>
+                    </div>
+                </div>
+            </div>
 
             <div class="columns">
                 <div class="column is-6">
                     <div class="field">
-                        <label class="label is-small">Nama Pengerusi Mesyuarat</label>
-                        <div class="control">
-                            <input class="input is-small" id="pengerusiMesyuarat" placeholder="Masukkan nama pengerusi..." required>
+                        <label class="label">Kehadiran (Boleh Pilih Banyak)</label>
+                        <div class="select is-fullwidth mb-2">
+                            <select id="teacherSelect" onchange="tambahGuru()">
+                                <option value="">-- Klik Untuk Pilih Kehadiran --</option>
+                                <option value="GURU BESAR">Guru Besar</option>
+                                <option value="GPK KURIKULUM">GPK Kurikulum</option>
+                                <option value="GPK HEM">GPK HEM</option>
+                                <option value="GPK KOKURIKULUM">GPK Kokurikulum</option>
+                                <option value="GPK PETANG">GPK Petang</option>
+                                <option value="SEMUA GURU">Semua Guru</option>
+                                <option value="SILA RUJUK LAMPIRAN">Sila Rujuk Lampiran</option>
+                            </select>
+                        </div>
+                        <div class="kehadiran-box" id="selectedTeachersBox">
+                            <span class="has-text-grey-light subtitle is-7">Belum ada pilihan dibuat. Sila klik dropdown di atas.</span>
                         </div>
                     </div>
                 </div>
                 <div class="column is-6">
                     <div class="field">
-                        <label class="label is-small">Nama Setiausaha / Pencatat Minit</label>
-                        <div class="control">
-                            <input class="input is-small" id="setiausahaMesyuarat" placeholder="Masukkan nama pencatat..." required>
-                        </div>
+                        <label class="label">Guru Tidak Hadir</label>
+                        <textarea class="textarea" id="tidakHadir" rows="3" placeholder="Masukkan nama guru tidak hadir & alasan jika ada..."></textarea>
                     </div>
                 </div>
             </div>
 
             <div class="field">
-                <label class="label is-small">Kehadiran Guru / Ahli Mesyuarat (<span id="jumlahHadir">0</span> Orang Terpilih)</label>
-                <div class="columns mb-1">
-                    <div class="column is-10">
-                        <div class="control">
-                            <div class="select is-small is-fullwidth">
-                                <select id="pilihGuru">
-                                    <option value="">-- Sila Pilih Nama Guru Untuk Ditambah --</option>
-                                    <option value="MOHD RAFWAN BIN MILATUS SAMSUL">MOHD RAFWAN BIN MILATUS SAMSUL</option>
-                                    <option value="JEHAN ADIBA BINTI AHMAD TAHA">JEHAN ADIBA BINTI AHMAD TAHA</option>
-                                    <option value="AZIZAH BINTI SHARIFF">AZIZAH BINTI SHARIFF</option>
-                                    <option value="AHMAD SYAHMI BIN NURDIN">AHMAD SYAHMI BIN NURDIN</option>
-                                    <option value="FAIZAH BINTI ABDUL RAHMAN">FAIZAH BINTI ABDUL RAHMAN</option>
-                                    <option value="KHAIRUL ANUAR BIN ZAINAL">KHAIRUL ANUAR BIN ZAINAL</option>
-                                    <option value="NORMAH BINTI SULAIMAN">NORMAH BINTI SULAIMAN</option>
-                                    <option value="SITI AMINAH BINTI BAKAR">SITI AMINAH BINTI BAKAR</option>
-                                    <option value="ZULKIFLI BIN MAHMUD">ZULKIFLI BIN MAHMUD</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="column is-2">
-                        <button type="button" class="button is-small is-info is-fullwidth" onclick="tambahGuruTerpilih()">
-                            <span class="icon"><i class="fas fa-plus"></i></span>
-                            <span>Tambah</span>
-                        </button>
-                    </div>
-                </div>
-                <div class="kehadiran-box" id="kotakSenaraiHadir">
-                    </div>
+                <label class="label">1. Ucapan Alu-aluan Pengerusi</label>
+                <textarea class="textarea" id="perutusan" rows="3" placeholder="Isi perutusan atau alu-aluan pengerusi..." required></textarea>
             </div>
 
-            <div class="field">
-                <label class="label is-small">Ahli Tidak Hadir (Sebab)</label>
-                <div class="control">
-                    <textarea class="textarea is-small" id="tidakHadirMesyuarat" rows="2" placeholder="Contoh: 1. Guru A (Sakit), 2. Guru B (Kursus) - Jika tiada, tulis: Tiada"></textarea>
-                </div>
-            </div>
-
-            <hr style="margin: 15px 0; background-color: #eee;">
-
-            <div class="field">
-                <label class="label is-small">1. Perutusan / Ucapan Alu-Aluan Pengerusi</label>
-                <div class="control">
-                    <textarea class="textarea is-small" id="perutusanPengerusi" rows="4" placeholder="Masukkan intipati ucapan pembukaan oleh pengerusi mesyuarat..." required></textarea>
-                </div>
-            </div>
-
-            <div class="field">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <label class="label is-small mb-0">Agenda / Isu / Perkara Seterusnya (Format KPM)</label>
-                    <button type="button" class="button is-small is-success" onclick="tambahKotakAgendaBaharu()">
-                        <span class="icon"><i class="fas fa-plus-circle"></i></span>
-                        <span>Tambah Agenda Baharu</span>
+            <div class="field mt-5">
+                <div class="is-flex is-justify-content-space-between is-align-items-center mb-3">
+                    <label class="label mb-0" style="color: var(--primary-color);">Perkara Baharu / Perbincangan Agenda & Tindakan</label>
+                    <button type="button" class="button is-small is-success is-light" onclick="tambahKotakAgenda()">
+                        <i class="fas fa-plus mr-1"></i> Tambah Agenda Baru
                     </button>
                 </div>
                 
@@ -241,180 +156,195 @@
                     <div class="agenda-item" data-index="0">
                         <div class="field">
                             <label class="label is-small">Tajuk Isu / Perkara / Agenda</label>
-                            <input class="input is-small agenda-tajuk" placeholder="Contoh: Analisis Pencapaian Akademik Konten PIT1 2026" required>
+                            <input class="input is-small agenda-tajuk" placeholder="Contoh: Analisis Pencapaian Akademik 2025" required>
                         </div>
                         <div class="columns">
                             <div class="column is-8">
                                 <label class="label is-small">Perincian Isu / Kandungan Agenda</label>
-                                <textarea class="textarea is-small agenda-isi" rows="3" placeholder="Nyatakan perkara yang dibincangkan serta keputusan mesyuarat..." required></textarea>
+                                <textarea class="textarea is-small agenda-isi" rows="3" placeholder="Nyatakan intipati perbincangan..." required></textarea>
                             </div>
                             <div class="column is-4">
                                 <label class="label is-small">Tindakan / Makluman Kepada</label>
-                                <textarea class="textarea is-small agenda-tindakan" rows="3" placeholder="Contoh: Semua Guru / KP Mata Pelajaran" required></textarea>
+                                <textarea class="textarea is-small agenda-tindakan" rows="3" placeholder="Contoh: Semua guru / Panitia berkaitan" required></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="field is-grouped is-grouped-right" style="margin-top: 30px;">
-                <div class="control">
-                    <button type="submit" class="button is-link" style="background-color: var(--primary-color);">
-                        <span class="icon"><i class="fas fa-file-pdf"></i></span>
-                        <span>Simpan & Jana Dokumen PDF KPM</span>
-                    </button>
-                </div>
-            </div>
+            <button type="submit" class="button is-link is-fullwidth is-large mt-5">
+                <i class="fas fa-file-pdf mr-2"></i> SIMPAN & JANA PDF JADUAL
+            </button>
         </form>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCRJOiazrnB36Gfsr3chXsyuKN3W4Bw1EY",
+            authDomain: "minit-mesyuarat-sksr.firebaseapp.com",
+            projectId: "minit-mesyuarat-sksr",
+            storageBucket: "minit-mesyuarat-sksr.firebasestorage.app",
+            messagingSenderId: "89243689884",
+            appId: "1:89243689884:web:f3b1ab7d263f4841915e59",
+            measurementId: "G-01Q8992WC4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const dataUnit = {
+            KURIKULUM: [
+                "Pengurusan Kurikulum", "Panitia Bahasa Melayu", "Panitia Bahasa Inggeris", 
+                "Panitia Matematik", "Panitia Sains", "Panitia Pendidikan Islam/Moral", 
+                "Panitia Bahasa Arab", "Panitia Pendidikan Jasmani dan Kesihatan", 
+                "Panitia Pendidikan Seni Visual", "Panitia Pendidikan Muzik"
+            ],
+            HEM: [
+                "Pengurusan HEM", "Unit Disiplin & Pengawas", "Unit Bimbingan & Kaunseling", 
+                "Unit Skim Pinjaman Buku Teks", "Unit Kantin", "Unit RMT", 
+                "Unit Kesihatan dan Keselamatan", "Unit Kebajikan dan Bantuan", 
+                "Unit APDM/IDME/Kehadiran Murid", "Unit Pendaftaran dan Penempatan", "Unit Lawatan"
+            ],
+            KOKURIKULUM: ["Pengurusan Kokurikulum"],
+            PENTADBIRAN: ["Mesyuarat Guru & Staf", "Mesyuarat Kewangan", "Mesyuarat JK Pengurusan"]
+        };
+
+        window.kemaskiniUnit = () => {
+            const kat = document.getElementById('kategoriUnit').value;
+            const det = document.getElementById('namaUnitDetail');
+            det.innerHTML = '<option value="">-- Pilih Unit --</option>';
+            if(dataUnit[kat]) dataUnit[kat].forEach(u => { det.innerHTML += `<option value="${u}">${u}</option>`; });
+        };
+
+        document.getElementById('namaUnitDetail').addEventListener('change', function() {
+            if(this.value) document.getElementById('tajuk').value = `Mesyuarat ${this.value} Bil 1/2026`;
+        });
+
+        // MULTIPLE SELECT DRIVEN BY TAGS
         let senaraiGuruDipilih = [];
-        let counterAgenda = 1;
-
-        // Fungsi Tambah Guru Terpilih Ke Dalam Senarai Kehadiran
-        function tambahGuruTerpilih() {
-            const selectElement = document.getElementById('pilihGuru');
-            const namaGuru = selectElement.value;
-
-            if (!namaGuru) return;
-
-            if (senaraiGuruDipilih.includes(namaGuru)) {
-                alert("Nama guru ini sudah tersenarai dalam daftar kehadiran.");
-                return;
+        window.tambahGuru = () => {
+            const selectEl = document.getElementById('teacherSelect');
+            if(!selectEl.value) return;
+            if(!senaraiGuruDipilih.includes(selectEl.value)) {
+                senaraiGuruDipilih.push(selectEl.value);
+                renderTags();
             }
-
-            senaraiGuruDipilih.push(namaGuru);
-            selectElement.value = ""; // Reset dropdown pilihan
-            renderTags();
-        }
-
-        // Fungsi Padam Guru Daripada Senarai Kehadiran
-        function buangNamaGuru(nama) {
+            selectEl.value = "";
+        };
+        window.padamGuru = (nama) => {
             senaraiGuruDipilih = senaraiGuruDipilih.filter(g => g !== nama);
             renderTags();
-        }
-
-        // Fungsi Kemas Kini Paparan Tag Nama Guru & Kaunter Jumlah Hadir
+        };
         function renderTags() {
-            const container = document.getElementById('kotakSenaraiHadir');
-            container.innerHTML = "";
-            
+            const container = document.getElementById('selectedTeachersBox');
+            container.innerHTML = senaraiGuruDipilih.length === 0 ? `<span class="has-text-grey-light subtitle is-7">Belum ada pilihan dibuat. Sila klik dropdown di atas.</span>` : "";
             senaraiGuruDipilih.forEach(guru => {
-                const tagHTML = `
-                    <span class="tag is-info is-light teacher-tag">
-                        ${guru}
-                        <button type="button" class="delete is-small" onclick="buangNamaGuru('${guru}')"></button>
-                    </span>
-                `;
-                container.insertAdjacentHTML('beforeend', tagHTML);
+                container.innerHTML += `<span class="tag is-info is-light teacher-tag">${guru}<button type="button" class="delete is-small" onclick="padamGuru('${guru}')"></button></span>`;
             });
-
-            document.getElementById('jumlahHadir').innerText = senaraiGuruDipilih.length;
         }
 
-        // Fungsi Tambah Kotak Agenda Dinamik Secara Berterusan
-        function tambahKotakAgendaBaharu() {
+        // FUNGSI AGENDA DINAMIK
+        let counterAgenda = 1;
+        window.tambahKotakAgenda = () => {
             const container = document.getElementById('agendaContainer');
-            const itemHTML = `
+            const htmlAgendaBaru = `
                 <div class="agenda-item" data-index="${counterAgenda}">
-                    <button type="button" class="button is-danger is-small btn-buang-agenda" onclick="buangKotakAgenda(this)">
-                        <span class="icon"><i class="fas fa-trash-alt"></i></span>
+                    <button type="button" class="button is-small is-danger is-light btn-buang-agenda" onclick="buangKotakAgenda(${counterAgenda})">
+                        <i class="fas fa-trash"></i>
                     </button>
                     <div class="field">
                         <label class="label is-small">Tajuk Isu / Perkara / Agenda</label>
-                        <input class="input is-small agenda-tajuk" placeholder="Nyatakan agenda atau perkara berbangkit..." required>
+                        <input class="input is-small agenda-tajuk" placeholder="Contoh: Perbincangan Aktiviti Sampingan" required>
                     </div>
                     <div class="columns">
                         <div class="column is-8">
                             <label class="label is-small">Perincian Isu / Kandungan Agenda</label>
-                            <textarea class="textarea is-small agenda-isi" rows="3" placeholder="Nyatakan keputusan perbincangan isu..." required></textarea>
+                            <textarea class="textarea is-small agenda-isi" rows="3" placeholder="Nyatakan intipati perbincangan..." required></textarea>
                         </div>
                         <div class="column is-4">
                             <label class="label is-small">Tindakan / Makluman Kepada</label>
-                            <textarea class="textarea is-small agenda-tindakan" rows="3" placeholder="Contoh: Makluman Semua Ahli" required></textarea>
+                            <textarea class="textarea is-small agenda-tindakan" rows="3" placeholder="Contoh: Makluman semua guru" required></textarea>
                         </div>
                     </div>
                 </div>
             `;
-            container.insertAdjacentHTML('beforeend', itemHTML);
+            container.insertAdjacentHTML('beforeend', htmlAgendaBaru);
             counterAgenda++;
-        }
+        };
 
-        // Fungsi Buang Kotak Agenda Tertentu
-        function buangKotakAgenda(buttonElement) {
-            const agendaBox = buttonElement.closest('.agenda-item');
-            agendaBox.remove();
-        }
+        window.buangKotakAgenda = (index) => {
+            const item = document.querySelector(`.agenda-item[data-index="${index}"]`);
+            if(item) item.remove();
+        };
 
-        // PENGENDALIAN SUBMIT BORANG & PROSES GENERATE PDF MULTI-PAGE
-        document.getElementById('minitForm').addEventListener('submit', function(e) {
+        // SUBMIT & PROSES PDF
+        document.getElementById('minitForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            if(senaraiGuruDipilih.length === 0) { alert("Sila tentukan maklumat kehadiran terlebih dahulu."); return; }
 
-            if (senaraiGuruDipilih.length === 0) {
-                alert("Sila pilih dan tambah sekurang-kurangnya seorang ahli mesyuarat yang hadir!");
-                return;
-            }
-
-            // Membina Objek Payload Data Borang
-            const agendaElements = document.querySelectorAll('.agenda-item');
-            const senaraiAgendaData = [];
-
-            agendaElements.forEach(item => {
-                senaraiAgendaData.push({
+            const agendaItems = document.querySelectorAll('.agenda-item');
+            let senaraiAgendaPayload = [];
+            agendaItems.forEach(item => {
+                senaraiAgendaPayload.push({
                     sub_tajuk: item.querySelector('.agenda-tajuk').value,
                     sub_isi: item.querySelector('.agenda-isi').value,
                     sub_tindakan: item.querySelector('.agenda-tindakan').value
                 });
             });
 
+            const guruTidakHadirTeks = document.getElementById('tidakHadir').value || "Tiada / Penuh";
+
             const payload = {
-                tajuk: document.getElementById('tajukMesyuarat').value,
-                rujukan: document.getElementById('rujukanFail').value,
-                tarikh: document.getElementById('tarikhMesyuarat').value,
-                masa: document.getElementById('masaMesyuarat').value,
-                tempat: document.getElementById('tempatMesyuarat').value,
                 kategori: document.getElementById('kategoriUnit').value,
-                pengerusi: document.getElementById('pengerusiMesyuarat').value,
-                setiausaha: document.getElementById('setiausahaMesyuarat').value,
-                tidak_hadir: document.getElementById('tidakHadirMesyuarat').value || "Tiada",
+                unit: document.getElementById('namaUnitDetail').value,
+                tajuk: document.getElementById('tajuk').value,
+                rujukan: document.getElementById('rujukanFail').value || "Tiada Rujukan",
+                tarikh: document.getElementById('tarikh').value,
+                masa: document.getElementById('masa').value,
+                tempat: document.getElementById('tempat').value,
+                pengerusi: document.getElementById('pengerusi').value,
+                setiausaha: document.getElementById('setiausaha').value,
                 kehadiran: senaraiGuruDipilih,
-                senarai_agenda: senaraiAgendaData
+                tidak_hadir: guruTidakHadirTeks,
+                perutusan_pengerusi: document.getElementById('perutusan').value,
+                senarai_agenda: senaraiAgendaPayload,
+                tarikh_diisi: new Date().toISOString()
             };
 
+            try { await addDoc(collection(db, "minit_mesyuarat"), payload); } catch (err) { console.error("Ralat Firebase:", err); }
+
             // =================================================================
-            // PROSES JANA PDF MENGGUNAKAN ELEMEN LOGO RASMI (DIKEMAS KINI)
+            // PENJANAAN PDF FORMAT MULTI-PAGE KPM DENGAN LOGO SEKOLAH
             // =================================================================
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'pt', 'a4');
 
-            let startTableY = 165; // Ruang keselamatan bahagian atas (Header KPM)
+            let startTableY = 165; // Menurunkan jadual awal bagi memberi ruang susunan logo di atas
 
-            // Mengambil elemen gambar logo sekolah secara terus dari struktur DOM HTML
+            // Menyuntik gambar logo_sksr.png dari DOM ke fail PDF
             const logoImg = document.getElementById('logoSekolah');
             if (logoImg) {
                 try {
-                    // Menyuntik imej lokal ke PDF (Tengah Atas: X=262.5, Y=20, Lebar=70, Tinggi=70)
+                    // Kedudukan logo di tengah-tengah dokumen PDF (X: 262.5, Y: 20, Lebar: 70, Tinggi: 70)
                     doc.addImage(logoImg, 'PNG', 262.5, 20, 70, 70);
-                } catch(err) {
-                    console.error("Gagal menyuntik imej logo ke dalam fail PDF:", err);
+                } catch (err) {
+                    console.error("Suntikan logo ke PDF gagal:", err);
                 }
             }
 
-            // Tetapan Teks Tajuk Surat Minit Mesyuarat Rasmi
             doc.setFont("Helvetica", "bold");
             doc.setFontSize(13);
             doc.text("MINIT MESYUARAT SESI PERSEKOLAHAN 2026", 297, startTableY - 50, { align: "center" });
             doc.text("SK SIMPANG RENGAM", 297, startTableY - 32, { align: "center" });
 
-            // Pemformatan Senarai Nama Kehadiran Secara Berbaris (Numbered List)
             let teksKehadiranDiformat = "";
             payload.kehadiran.forEach((g, idx) => { teksKehadiranDiformat += `${idx + 1}. ${g}\n`; });
             
-            // Format Tarikh Dari YYYY-MM-DD Kepada DD/MM/YYYY
             const tarikhDiformat = payload.tarikh.split('-').reverse().join('/');
 
-            // Pembuatan Jadual Maklumat Asas Minit (Table 1)
             doc.autoTable({
                 startY: startTableY,
                 theme: 'plain',
@@ -434,7 +364,6 @@
                 ]
             });
 
-            // Pembinaan Susunan Kandungan Minit Mesyuarat (Table 2 - Isi Minit)
             let susunanBarisIsi = [
                 [
                     { content: '1', styles: { halign: 'center' } }, 
@@ -443,7 +372,6 @@
                 ]
             ];
 
-            // Melakukan pusingan (looping) untuk memasukkan agenda dinamik ke dalam jadual PDF
             payload.senarai_agenda.forEach((agenda, index) => {
                 susunanBarisIsi.push([
                     { content: (index + 2).toString(), styles: { halign: 'center' } },
@@ -452,7 +380,6 @@
                 ]);
             });
 
-            // Memaparkan Jadual Kandungan Utama Minit
             doc.autoTable({
                 startY: doc.lastAutoTable.finalY + 15,
                 theme: 'plain',
@@ -467,7 +394,6 @@
                 body: susunanBarisIsi
             });
 
-            // Penentuan Kedudukan Dan Ruang Tandatangan Urus Setia (Footer)
             let finalY = doc.lastAutoTable.finalY + 30;
             if (finalY > 730) { 
                 doc.addPage(); 
@@ -478,7 +404,6 @@
             doc.setFontSize(10);
             doc.text("Disediakan oleh:", 50, finalY);
             
-            // Garis Tandatangan Putus-Putus
             doc.setLineDashPattern([3, 3], 0);
             doc.line(50, finalY + 45, 250, finalY + 45);
             
@@ -488,28 +413,25 @@
             doc.text("Setiausaha Mesyuarat", 50, finalY + 72);
             doc.text("SK Simpang Rengam", 50, finalY + 84);
 
-            // Simpan Dokumen Ke Komputer Pengguna Secara Automatik
             doc.save(`Minit_${payload.tajuk.replace(/\s+/g, '_')}.pdf`);
-            alert("Berjaya disimpan! Fail PDF beserta Logo Rasmi Sekolah telah dimuat turun.");
+            alert("Berjaya disimpan! Fail PDF jadual minit mesyuarat beserta Logo Sekolah telah dimuat turun.");
 
-            // =================================================================
-            // RESET BORANG KEMBALI KEDADA ASAL SETELAH SELESAI JANA PDF
-            // =================================================================
+            // Reset Borang
             document.getElementById('minitForm').reset();
             document.getElementById('agendaContainer').innerHTML = `
                 <div class="agenda-item" data-index="0">
                     <div class="field">
                         <label class="label is-small">Tajuk Isu / Perkara / Agenda</label>
-                        <input class="input is-small agenda-tajuk" placeholder="Contoh: Analisis Pencapaian Akademik Konten PIT1 2026" required>
+                        <input class="input is-small agenda-tajuk" placeholder="Contoh: Analisis Pencapaian Akademik 2025" required>
                     </div>
                     <div class="columns">
                         <div class="column is-8">
                             <label class="label is-small">Perincian Isu / Kandungan Agenda</label>
-                            <textarea class="textarea is-small agenda-isi" rows="3" placeholder="Nyatakan perkara yang dibincangkan serta keputusan mesyuarat..." required></textarea>
+                            <textarea class="textarea is-small agenda-isi" rows="3" placeholder="Nyatakan intipati perbincangan..." required></textarea>
                         </div>
                         <div class="column is-4">
                             <label class="label is-small">Tindakan / Makluman Kepada</label>
-                            <textarea class="textarea is-small agenda-tindakan" rows="3" placeholder="Contoh: Semua Guru / KP Mata Pelajaran" required></textarea>
+                            <textarea class="textarea is-small agenda-tindakan" rows="3" placeholder="Contoh: Semua guru / Panitia berkaitan" required></textarea>
                         </div>
                     </div>
                 </div>
