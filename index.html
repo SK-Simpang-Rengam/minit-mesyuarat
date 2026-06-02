@@ -467,17 +467,10 @@
             binaJadualPaparan(hasilTapis);
         }
 
-        // FUNGSI GLOBAL UTAMA JANA PDF (VERSI MESRA SAFARI & POP-UP BLOCKER)
+        // =================================================================
+        // FUNGSI JANA PDF - 100% MESRA SEMUA GAJET (MAC, WINDOWS, IPHONE & ANDROID)
+        // =================================================================
         function janaPdfMinit(payload) {
-            // 1. TERUS BUKA TAB BAHARU KOSONG DAHULU (Sangat penting untuk lepas sekatan Safari)
-            const tabBaru = window.open('about:blank', '_blank');
-            if (!tabBaru) {
-                alert("Sila benarkan 'Pop-up' pada tetapan pelayar web Safari anda untuk melihat PDF.");
-                return;
-            }
-            // Letakkan teks loading sementara fail diproses
-            tabBaru.document.write('<p style="font-family:sans-serif; text-align:center; margin-top:50px; color:#4a4a4a;"><i class="fas fa-spinner fa-spin"></i> Membina paparan fail PDF minit... Sila tunggu sekejap.</p>');
-
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'pt', 'a4');
             let startTableY = 165;
@@ -512,10 +505,43 @@
             doc.setFont("Helvetica", "bold"); doc.text(payload.setiausaha.toUpperCase(), 50, finalY + 60);
             doc.setFont("Helvetica", "normal"); doc.text("Setiausaha Mesyuarat", 50, finalY + 72); doc.text("SK Simpang Rengam", 50, finalY + 84);
 
-            // 2. TUKAR URL TAB KOSONG TADI KEPADA URL BLOB PDF YANG SIAP
-            const blobUrl = doc.output('bloburl');
-            tabBaru.location.href = blobUrl;
+            const namaFail = `Minit_${payload.tajuk.replace(/\s+/g, '_')}.pdf`;
+
+            // LOGIK PENGESAN GAJET (SANGAT PENTING UTUK CROSS-PLATFORM)
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+            if (isMobile) {
+                // Jika gajet skrin kecil (Telefon/Tablet): Terus muat turun fail fizikal
+                doc.save(namaFail);
+            } else {
+                // Jika guna PC/Laptop/MacBook: Papar dalam modal iframe (Pantas & Selamat daripada Pop-up Blocker)
+                const blobUrl = doc.output('bloburl');
+                document.getElementById('pdfFrame').src = blobUrl;
+                document.getElementById('pdfModal').classList.add('is-active');
+            }
         }
+
+        // FUNGSI UNTUK TUTUP KOTAK MODAL PDF & KOSONGKAN MEMORI
+        window.tutupModalPdf = () => {
+            document.getElementById('pdfModal').classList.remove('is-active');
+            document.getElementById('pdfFrame').src = ""; 
+        };
     </script>
+
+    <div id="pdfModal" class="modal">
+        <div class="modal-background" onclick="tutupModalPdf()"></div>
+        <div class="modal-content" style="width: 85%; max-width: 900px; height: 85vh;">
+            <div class="box is-flex is-flex-direction-column" style="height: 100%; padding: 15px;">
+                <div class="is-flex is-justify-content-space-between is-align-items-center mb-3">
+                    <h3 class="title is-5 mb-0" style="color: var(--primary-color);">Pratinjau Minit Mesyuarat</h3>
+                    <button class="delete" aria-label="close" onclick="tutupModalPdf()"></button>
+                </div>
+                <div class="is-flex-grow-1" style="background: #e4e4e4; border-radius: 6px; overflow: hidden;">
+                    <iframe id="pdfFrame" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
