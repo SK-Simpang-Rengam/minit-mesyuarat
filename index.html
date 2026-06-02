@@ -14,9 +14,20 @@
         .form-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); max-width: 850px; margin: 0 auto; }
         
         /* Gaya Pengepala Borang */
-        .form-header { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 25px; border-bottom: 2px solid #edf2f7; padding-bottom: 15px; }
-        .form-logo { width: 70px; height: auto; }
-        .form-title-area { text-align: left; }
+        .form-header { display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px; /* Ini akan memberi jarak 20px automatik antara logo dan teks */
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 3px double #1e3a8a;
+}
+
+.form-header img {
+    width: 80px; /* Menetapkan saiz logo yang ideal */
+    height: auto;
+    flex-shrink: 0; /* Mengelakkan logo daripada terpenyet jika skrin telefon kecil */
+}
         
         /* Pengurusan Kehadiran */
         .kehadiran-box { border: 1px solid #dbdbdb; border-radius: 4px; padding: 10px; min-height: 60px; background: #fff; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 5px; }
@@ -30,7 +41,7 @@
 <body>
     <div class="form-container">
         <div class="form-header">
-            <img id="appLogoView" src="" alt="Logo SKSR" class="form-logo" style="display: none;">
+            <img src="logo_sksr.png" alt="Logo SK Simpang Rengam">
             <div class="form-title-area">
                 <h1 class="title is-4 mb-1" style="color: var(--primary-color);">SISTEM E-MINIT MESYUARAT</h1>
                 <p class="subtitle is-6 has-text-grey mb-0">SK Simpang Rengam</p>
@@ -328,17 +339,20 @@
 
             try { await addDoc(collection(db, "minit_mesyuarat"), payload); } catch (err) { console.error("Ralat Firebase:", err); }
 
-            // PENJANAAN PDF FORMAT MULTI-PAGE KPM DENGAN LOGO
+// =================================================================
+            // PENJANAAN PDF FORMAT MULTI-PAGE KPM DENGAN LOGO (DIKEMAS KINI)
+            // =================================================================
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'pt', 'a4');
 
             let startTableY = 165; // Menurunkan kedudukan permulaan jadual agar memberikan ruang kepada logo di atas
 
-            // Menyuntik Logo Sekolah ke dalam fail PDF
-            if(stringLogoBase64) {
+            // Menyuntik Logo Sekolah ke dalam fail PDF menggunakan elemen HTML langsung
+            const logoImg = document.getElementById('logoSekolah');
+            if (logoImg) {
                 try {
                     // Letak logo di bahagian atas tengah (X: 262.5, Y: 20, Lebar: 70, Tinggi: 70)
-                    doc.addImage(stringLogoBase64, 'PNG', 262.5, 20, 70, 70);
+                    doc.addImage(logoImg, 'PNG', 262.5, 20, 70, 70);
                 } catch(e) {
                     console.error("Gagal menyuntik logo ke PDF:", e);
                 }
@@ -425,7 +439,9 @@
             doc.save(`Minit_${payload.tajuk.replace(/\s+/g, '_')}.pdf`);
             alert("Berjaya disimpan! Fail PDF beserta Logo Rasmi Sekolah telah dimuat turun.");
 
-            // Reset Borang
+            // =================================================================
+            // RESET BORANG KEMBALI KEDADA ASAL SETELAH SELESAI
+            // =================================================================
             document.getElementById('minitForm').reset();
             document.getElementById('agendaContainer').innerHTML = `
                 <div class="agenda-item" data-index="0">
@@ -451,4 +467,4 @@
         });
     </script>
 </body>
-</html>
+</html>                                                              
